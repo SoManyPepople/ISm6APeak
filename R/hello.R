@@ -4,7 +4,7 @@
 # which prints 'Hello, world!'.
 
 hello <- function(x) {
-  x^2
+  x^3
 }
 
 
