@@ -21,10 +21,7 @@ getOption("repos")
 source("~/software/mysterypackage/mysterypackage/R/install_required_r_packages.R")
 
 install_mystery_packages(pkgs = c("doParallel","foreach","reshape","qvalue","Guitar","ggsci","tidyverse","data.table","TRESS"))
-install.packages("~/software/exomePeak/exomePeak-master/",repos = NULL,type="source")
-install.packages("~/software/MeTPeak/MeTPeak-master/",repos = NULL,type="source")
-install_mystery_packages(pkgs="MeRIPtools",github_map=c(MeRIPtools="scottzijiezhang/MeRIPtools"))
-install_mystery_packages(pkgs=c("exomePeak","MeRIPtools","MeTPeak"),github_map=c(exomePeak="ZW-xjtlu/exomePeak", MeRIPtools="scottzijiezhang/MeRIPtools", MeTPeak="compgenomics/MeTPeak"))
+install_mystery_packages(pkgs=c("exomePeak","MeRIPtools"),github_map=c(exomePeak="ZW-xjtlu/exomePeak", MeRIPtools="scottzijiezhang/MeRIPtools"))
 
 
 install_mystery_packages(pkgs = c("exomePeak", "exomePeak2", "TRESS", "MeTPeak","MeRIPtools","foreach","tidyverse","data.table"))

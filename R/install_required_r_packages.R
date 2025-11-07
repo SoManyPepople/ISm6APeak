@@ -27,11 +27,13 @@ install_mystery_packages <- function(pkgs = c("exomePeak", "exomePeak2", "TRESS"
   need_install <- setdiff(pkgs, installed_before)
 
   #install MeTPeak from source
-  file_path <- system.file("extdata", "MeTPeak-master", package = "mysterypackage")
-  if(file_path != ""){
-    install.packages(file_path,repos=NULL,type="source")
-  }else{
-    message("Required source package for MeTPeak is not found")
+  if(grep(need_install, "MeTPeak",value = T) == "MeTPeak"){
+    file_path <- system.file("extdata", "MeTPeak-master", package = "mysterypackage")
+    if(file_path != ""){
+      install.packages(file_path,repos=NULL,type="source")
+    }else{
+      message("Required source package for MeTPeak is not found")
+    }
   }
 
   #install remaining packages
