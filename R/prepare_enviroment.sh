@@ -18,9 +18,8 @@ options(repos = c(
   BioCexp  = paste0(repos_bioc_base, "/data/experiment")
 ))
 getOption("repos")
-source("~/software/mysterypackage/mysterypackage/R/install_required_r_packages.R")
 
-install_mystery_packages(pkgs = c("doParallel","foreach","reshape","qvalue","Guitar","ggsci","tidyverse","data.table","TRESS"))
+install_mystery_packages(pkgs = c("doParallel","foreach","reshape","qvalue","Guitar","ggsci","tidyverse","data.table","TRESS","MeTPeak","exomePeak2"))
 install_mystery_packages(pkgs=c("exomePeak","MeRIPtools"),github_map=c(exomePeak="ZW-xjtlu/exomePeak", MeRIPtools="scottzijiezhang/MeRIPtools"))
 
 
