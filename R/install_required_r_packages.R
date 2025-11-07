@@ -27,19 +27,19 @@ install_mystery_packages <- function(pkgs = c("exomePeak", "exomePeak2", "TRESS"
   need_install <- setdiff(pkgs, installed_before)
 
   #install MeTPeak from source
-  if(grep(need_install, pattern="MeTPeak",value = T) == "MeTPeak"){
-    file_path <- system.file("extdata", "MeTPeak-master", package = "mysterypackage")
-    if(file_path != ""){
-      install.packages(file_path,repos=NULL,type="source")
-    }else{
-      message("Required source package for MeTPeak is not found")
+  if (length(need_install) > 0 || update) {
+    if(grep(need_install, pattern="MeTPeak",value = T) == "MeTPeak"){
+      file_path <- system.file("extdata", "MeTPeak-master", package = "mysterypackage")
+      if(file_path != ""){
+        install.packages(file_path,repos=NULL,type="source")
+      }else{
+        message("Required source package for MeTPeak is not found")
+      }
     }
+    #install remaining packages
+    installed_before <- rownames(utils::installed.packages())
+    need_install <- setdiff(pkgs, installed_before)
   }
-
-  #install remaining packages
-  installed_before <- rownames(utils::installed.packages())
-  need_install <- setdiff(pkgs, installed_before)
-
   # Ensure BiocManager is available for Bioconductor packages and general robust install
   if (!requireNamespace("BiocManager", quietly = TRUE)) {
     message("Installing BiocManager from CRAN...")
