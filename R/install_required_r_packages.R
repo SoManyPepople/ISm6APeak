@@ -3,7 +3,7 @@
 #   install_mystery_packages()
 #   install_mystery_packages(update = TRUE)
 #   install_mystery_packages(github_map = c(exomePeak2 = "username/exomePeak2"))
-install_mystery_packages <- function(pkgs = c("exomePeak", "exomePeak2", "TRESS", "MeTPeak","MeRIPtools","foreach","tidyverse","data.table"),
+install_mystery_packages <- function(pkgs = c("exomePeak", "exomePeak2", "TRESS", "MeRIPtools","foreach","tidyverse","data.table"),
                                      update = FALSE,
                                      ask = FALSE,
                                      github_map = NULL,
@@ -23,6 +23,18 @@ install_mystery_packages <- function(pkgs = c("exomePeak", "exomePeak2", "TRESS"
     }
   }
 
+  installed_before <- rownames(utils::installed.packages())
+  need_install <- setdiff(pkgs, installed_before)
+
+  #install MeTPeak from source
+  file_path <- system.file("extdata", "MeTPeak-master", package = "mysterypackage")
+  if(file_path != ""){
+    install.packages(file_path,repos=NULL,type="source")
+  }else{
+    message("Required source package for MeTPeak is not found")
+  }
+
+  #install remaining packages
   installed_before <- rownames(utils::installed.packages())
   need_install <- setdiff(pkgs, installed_before)
 
@@ -102,3 +114,4 @@ install_mystery_packages <- function(pkgs = c("exomePeak", "exomePeak2", "TRESS"
 # install_mystery_packages()
 # If you know the GitHub repo for a package not on CRAN/Bioconductor:
 # install_mystery_packages(github_map = c(exomePeak2 = "user/exomePeak2"))
+

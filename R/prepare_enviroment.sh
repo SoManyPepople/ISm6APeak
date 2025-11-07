@@ -1,18 +1,7 @@
-source("~/software/mysterypackage/mysterypackage/R/install_required_r_packages.R")
-install_mystery_packages(pkgs = c("exomePeak", "exomePeak2", "TRESS", "MeTPeak","MeRIPtools","foreach","tidyverse","data.table")[1])
-install_mystery_packages(pkgs = c("exomePeak", "exomePeak2", "TRESS", "MeTPeak","MeRIPtools","foreach","tidyverse","data.table")[2])
-install_mystery_packages(pkgs = c("exomePeak", "exomePeak2", "TRESS", "MeTPeak","MeRIPtools","foreach","tidyverse","data.table")[3])
-install_mystery_packages(pkgs = c("exomePeak", "exomePeak2", "TRESS", "MeTPeak","MeRIPtools","foreach","tidyverse","data.table")[4])
-install_mystery_packages(pkgs = c("exomePeak", "exomePeak2", "TRESS", "MeTPeak","MeRIPtools","foreach","tidyverse","data.table")[5])
-install_mystery_packages(pkgs = c("exomePeak", "exomePeak2", "TRESS", "MeTPeak","MeRIPtools","foreach","tidyverse","data.table")[6])
-install_mystery_packages(pkgs = c("exomePeak", "exomePeak2", "TRESS", "MeTPeak","MeRIPtools","foreach","tidyverse","data.table")[7])
-install_mystery_packages(pkgs = c("exomePeak", "exomePeak2", "TRESS", "MeTPeak","MeRIPtools","foreach","tidyverse","data.table")[8])
-
-
-
 
 conda create -n TestMyPackage -c conda-forge -c bioconda -c defaults macs2 bedtools rseqc samtools \
 r-base bioconda::bioconductor-exomepeak2 conda-forge::r-tidyverse conda-forge::r-vcfr
+
 
 options(repos = c( CRAN = "https://mirrors.tuna.tsinghua.edu.cn/CRAN/"))
 if (!requireNamespace("BiocManager", quietly = TRUE))
@@ -29,12 +18,17 @@ options(repos = c(
   BioCexp  = paste0(repos_bioc_base, "/data/experiment")
 ))
 getOption("repos")
+source("~/software/mysterypackage/mysterypackage/R/install_required_r_packages.R")
 
 install_mystery_packages(pkgs = c("doParallel","foreach","reshape","qvalue","Guitar","ggsci","tidyverse","data.table","TRESS"))
 install.packages("~/software/exomePeak/exomePeak-master/",repos = NULL,type="source")
 install.packages("~/software/MeTPeak/MeTPeak-master/",repos = NULL,type="source")
 install_mystery_packages(pkgs="MeRIPtools",github_map=c(MeRIPtools="scottzijiezhang/MeRIPtools"))
+install_mystery_packages(pkgs=c("exomePeak","MeRIPtools","MeTPeak"),github_map=c(exomePeak="ZW-xjtlu/exomePeak", MeRIPtools="scottzijiezhang/MeRIPtools", MeTPeak="compgenomics/MeTPeak"))
+
 
 install_mystery_packages(pkgs = c("exomePeak", "exomePeak2", "TRESS", "MeTPeak","MeRIPtools","foreach","tidyverse","data.table"))
-
+for(p in c("exomePeak", "exomePeak2", "TRESS", "MeTPeak","MeRIPtools","foreach","tidyverse","data.table")){
+  library(p,character.only=T)
+}
 
