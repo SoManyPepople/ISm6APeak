@@ -1,35 +1,4 @@
-#function to run MACS2
-RunMACS2 <- function(MACS2_path = "~/anaconda3/envs/mysterypackage/bin/",
-                     org="mm",
-                     InputBAM = "/data/m6A_calling_strategy/7_MACS2SPeak/BAM/R1_bam/mESC_IVT1_Input.sortedByCoord.UN.R1.bam",
-                     RIPBAM = "/data/m6A_calling_strategy/7_MACS2SPeak/BAM/R1_bam/mESC_IVT1_RIP.sortedByCoord.UN.R1.bam",
-                     outdir = "/data/m6A_calling_strategy/MACS2",
-                     prefix="mESC_NEB_WT_rep2",
-                     MACS2.options=" --keep-dup all ",
-                     nomodel=c(FALSE,TRUE)[1],#deafault is FALSE, i.e, build shifting model
-                     mfold = c("-m 5 50", "-m 2 50")[1],#Select the regions within MFOLD range of high-confidence enrichment ratio against background to build model
-                     #extsize=c(200,150),#default is 200
-                     inputformat=c("BAM","BAMPE")[1],
-                     pvalue_cutoff=c(NA,0.99,0.05,0.01,0.001)[1],#default not set,mutually exclusive with qvalue,if set pvalue, qvalue will not be calculated
-                     qvalue_cutoff=c(0.99,0.05,0.01,0.001)[2],#default set as 0.05,ignored when pvalue is setted
-                     nolambda=c(TRUE,FALSE)[2],#default is FALSE
-                     fe_cutoff=1,
-                     verbose = TRUE){
-  if(!dir.exists(outdir)){dir.create(outdir,recursive = T)}
-  if(!file.exists(paste0(outdir,"/",prefix,"_peaks.xls"))){
-    if(!is.na(pvalue_cutoff)){
-      MACS2.options <- paste0(MACS2.options, " --fe-cutoff ", fe_cutoff, " -f ", inputformat, " --pvalue ", pvalue_cutoff, " ", mfold)
-    }else{
-      MACS2.options <- paste0(MACS2.options, " --fe-cutoff ", fe_cutoff, " -f ", inputformat, " --qvalue ", qvalue_cutoff, " ", mfold)
-    }
-    if(nomodel==TRUE){MACS2.options <- paste0(MACS2.options, " --nomodel ")}
-    if(nolambda == TRUE){MACS2.options <- paste0(MACS2.options, " --nolambda ")}
-    cmd <- paste0(MACS2_path,"macs2 callpeak ", "-g ", org, " ", MACS2.options, " -t ", RIPBAM, " -c ", InputBAM, " --outdir ", outdir, " -n ", prefix)
-    system(cmd,intern = verbose)
-  }else{
-    message(paste0("Detected existed peak file, skipped MACS2 peak calling for ", prefix))
-  }
-}
+
 #function to run exomePeak
 RunexomePeak <- function(InputBAM="~/m6A_calling_strategy/6_alignment_star/R2_bam/mESC_NEB_WT_rep2_Input_STAR.Aligned.out.SortedByCoord.unique.deduplicate.R2.bam",
                          RIPBAM="~/m6A_calling_strategy/6_alignment_star/R2_bam/mESC_NEB_WT_rep2_RIP_STAR.Aligned.out.SortedByCoord.unique.deduplicate.R2.bam",
