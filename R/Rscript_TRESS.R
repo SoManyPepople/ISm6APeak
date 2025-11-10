@@ -2,13 +2,11 @@ options(echo=TRUE) # if you want see commands in output file
 args <- commandArgs(trailingOnly = TRUE)
 
 options(stringsAsFactors = F)
-setwd("/data/m6A_calling_strategy")
 require(data.table)
 require(tidyverse)
 require(foreach)
 require(doParallel)
 
-source("/data/m6A_calling_strategy/Script/Wrapper_function_for_m6A_calling_using_MACS2SMePeak.R")
 t1 <- Sys.time()
 dt.parameter.combo <- foreach(IncludeIntron=c(FALSE,TRUE),.combine ='rbind')%do%{#default is FALSE
   foreach(binsize=c(50,100),.combine='rbind')%do%{#default is 50
@@ -23,8 +21,8 @@ dt.parameter.combo <- foreach(IncludeIntron=c(FALSE,TRUE),.combine ='rbind')%do%
       }
     }
   }
-} %>% dplyr::filter((Threshold=="pval" & is.na(fdr.cutoff) & !is.na(pval.cutoff)) | (Threshold=="fdr" & is.na(pval.cutoff) & !is.na(fdr.cutoff))) %>% 
-  #filter(IncludeIntron==FALSE & binsize==100 & lowcount==50) %>% 
+} %>% dplyr::filter((Threshold=="pval" & is.na(fdr.cutoff) & !is.na(pval.cutoff)) | (Threshold=="fdr" & is.na(pval.cutoff) & !is.na(fdr.cutoff))) %>%
+  #filter(IncludeIntron==FALSE & binsize==100 & lowcount==50) %>%
   dplyr::arrange(IncludeIntron,binsize,lowcount,Threshold, pval.cutoff, fdr.cutoff) %>%  mutate(ComboName=paste0("Combo",1:nrow(.)))
 
 
@@ -39,17 +37,18 @@ Annot.gtf <- args[8]
 Annot.sqlite <- args[9]
 Annot.genome <- args[10]
 
-bin_path 
-InputBAM 
-RIPBAM 
+bin_path
+InputBAM
+RIPBAM
 outdir
 prefix
-SelectedCombo 
-Organism 
-Annot.gtf 
-Annot.sqlite 
-Annot.genome 
+SelectedCombo
+Organism
+Annot.gtf
+Annot.sqlite
+Annot.genome
 
+setwd(dir = outdir)
 if(SelectedCombo %in% dt.parameter.combo$ComboName){
   RunTRESS(InputBAM=InputBAM,
            RIPBAM=RIPBAM,

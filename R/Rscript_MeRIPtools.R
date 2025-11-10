@@ -2,12 +2,10 @@ options(echo=TRUE) # if you want see commands in output file
 args <- commandArgs(trailingOnly = TRUE)
 
 options(stringsAsFactors = F)
-setwd("/data/m6A_calling_strategy")
 require(data.table)
 require(tidyverse)
 require(foreach)
 require(doParallel)
-source("/data/m6A_calling_strategy/Script/Wrapper_function_for_m6A_calling_using_MACS2SMePeak.R")
 
 dt.parameter.combo <-  foreach(binSize=c(50),.combine = 'rbind')%do%{#default is 50
   foreach(test.method=c("Fisher","Binomial"),.combine='rbind')%do%{#default is unknown
@@ -38,18 +36,19 @@ Strandness <- args[11]
 nThread <- as.integer(args[12])
 
 bin_path
-InputBAM 
+InputBAM
 RIPBAM
-outdir 
+outdir
 prefix
-SelectedCombo 
-Organism 
+SelectedCombo
+Organism
 Annot.gtf
-Annot.sqlite 
-Annot.genome 
+Annot.sqlite
+Annot.genome
 Strandness
 nThread
 
+setwd(dir = outdir)
 t1 <- Sys.time()
 if(SelectedCombo %in% dt.parameter.combo$ComboName){
   RunMeRIPtools(
@@ -69,7 +68,7 @@ if(SelectedCombo %in% dt.parameter.combo$ComboName){
     fdr_cutoff=dt.parameter.combo[ComboName==SelectedCombo,fdr_cutoff],
     oddratio_cutoff=dt.parameter.combo[ComboName==SelectedCombo,oddratio_cutoff],#
     genome_file=Annot.genome
-  )           
+  )
 }
 Sys.time() - t1
 

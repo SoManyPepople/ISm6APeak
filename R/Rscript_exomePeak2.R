@@ -2,12 +2,10 @@ options(echo=TRUE) # if you want see commands in output file
 args <- commandArgs(trailingOnly = TRUE)
 
 options(stringsAsFactors = F)
-setwd("/data/m6A_calling_strategy")
 require(data.table)
 require(tidyverse)
 require(foreach)
 require(doParallel)
-source("/data/m6A_calling_strategy/Script/Wrapper_function_for_m6A_calling_using_MACS2SMePeak.R")
 
 dt.parameter.combo <- foreach(mode=c("exon","full_transcript"),.combine='rbind')%do%{#default is exon
   foreach(bin.size=c(25,50,100),.combine='rbind')%do%{#default is 25
@@ -17,13 +15,13 @@ dt.parameter.combo <- foreach(mode=c("exon","full_transcript"),.combine='rbind')
       }
     }
   }
-} %>% dplyr::filter(bin.size>=step.size) %>% 
+} %>% dplyr::filter(bin.size>=step.size) %>%
   #filter(mode=="exon" & bin.size==100 & step.size==30) %>%
   dplyr::arrange(mode,bin.size,step.size,pvalue_cutoff) %>%
   mutate(ComboName=paste0("Combo",1:nrow(.)))
 dt.parameter.combo <- dt.parameter.combo %>% dplyr::filter(mode != "whole_genome")#too slow to run
 
-# 
+#
 bin_path <- as.character(args[1])#"/home/huangp/anaconda3/envs/m6A_seq/bin/"
 InputBAM <- as.character(args[2])#"/data/m6A_calling_strategy/7_MACS2SPeak/BAM//HEK_Abcam_mRNA1_Input.sortedByCoord.UN.bam"
 RIPBAM <- as.character(args[3])#"/data/m6A_calling_strategy/7_MACS2SPeak/BAM//HEK_Abcam_mRNA1_RIP.sortedByCoord.UN.bam"
@@ -52,8 +50,8 @@ stranded.bamfolder <- paste0(outdir %>% strsplit(split="exomePeak2",fixed=T) %>%
 
 
 bin_path
-InputBAM 
-RIPBAM 
+InputBAM
+RIPBAM
 outdir
 prefix
 SelectedCombo
@@ -64,6 +62,8 @@ Annot.genome
 Strandness
 stranded.bamfolder
 nThread
+
+setwd(dir = outdir)
 t1 <- Sys.time()
 if(SelectedCombo %in% dt.parameter.combo$ComboName){
   RunexomePeak2(

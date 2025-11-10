@@ -2,13 +2,10 @@ options(echo=TRUE) # if you want see commands in output file
 args <- commandArgs(trailingOnly = TRUE)
 
 options(stringsAsFactors = F)
-setwd("/data/m6A_calling_strategy")
 require(data.table)
 require(tidyverse)
 require(foreach)
 require(doParallel)
-
-source("/data/m6A_calling_strategy/Script/Wrapper_function_for_m6A_calling_using_MACS2SMePeak.R")
 
 dt.parameter.combo <- foreach(pvalue=c(NA,1,0.05,0.01,0.001),.combine='rbind')%do%{#default is NA
   foreach(qvalue=c(1,0.05,0.01,0.001), .combine='rbind')%do%{#default is 5e-2
@@ -37,22 +34,24 @@ Annot.genome <- args[10]
 t1<- Sys.time()
 
 bin_path
-InputBAM 
-RIPBAM 
-outdir 
-prefix 
-SelectedCombo 
-Organism 
-Annot.gtf 
-Annot.sqlite 
-Annot.genome 
+InputBAM
+RIPBAM
+outdir
+prefix
+SelectedCombo
+Organism
+Annot.gtf
+Annot.sqlite
+Annot.genome
+
+setwd(dir = outdir)
 
 if(SelectedCombo %in% dt.parameter.combo$ComboName){
   RunMACS2(MACS2_path = bin_path,
            org=ifelse(Organism=="Human","hs","mm"),
            InputBAM = InputBAM,
            RIPBAM = RIPBAM,
-           outdir = paste0(outdir,"/MACS2_", SelectedCombo), 
+           outdir = paste0(outdir,"/MACS2_", SelectedCombo),
            prefix=prefix,
            MACS2.options=" --keep-dup all ",
            nomodel=dt.parameter.combo[ComboName==SelectedCombo,nomodel],#deafault is FALSE, i.e, build shifting model

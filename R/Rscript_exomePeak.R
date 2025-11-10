@@ -2,13 +2,10 @@ options(echo=TRUE) # if you want see commands in output file
 args <- commandArgs(trailingOnly = TRUE)
 
 options(stringsAsFactors = F)
-setwd("/data/m6A_calling_strategy")
 require(data.table)
 require(tidyverse)
 require(foreach)
 require(doParallel)
-
-source("/data/m6A_calling_strategy/Script/Wrapper_function_for_m6A_calling_using_MACS2SMePeak.R")
 
 dt.parameter.combo <- foreach(pvalue=c(NA,1,1e-2,1e-5,1e-8),.combine = 'rbind')%do%{#default is NA
   foreach(fdr=c(NA,1,5e-2,1e-3,1e-5),.combine='rbind')%do%{#default is 5e-2
@@ -35,21 +32,22 @@ Annot.sqlite <- args[9]
 Annot.genome <- args[10]
 
 
-bin_path 
-InputBAM 
+bin_path
+InputBAM
 RIPBAM
-outdir 
-prefix 
-SelectedCombo 
-Organism 
-Annot.gtf 
-Annot.sqlite 
-Annot.genome 
+outdir
+prefix
+SelectedCombo
+Organism
+Annot.gtf
+Annot.sqlite
+Annot.genome
 
+setwd(dir = outdir)
 if(SelectedCombo %in% dt.parameter.combo$ComboName){
   RunexomePeak(InputBAM=InputBAM,
                RIPBAM=RIPBAM,
-               outdir = paste0(outdir,"/exomePeak_", SelectedCombo), 
+               outdir = paste0(outdir,"/exomePeak_", SelectedCombo),
                prefix=prefix,
                gtf=Annot.gtf,
                window.width=dt.parameter.combo[ComboName==SelectedCombo,window.size],
@@ -57,7 +55,7 @@ if(SelectedCombo %in% dt.parameter.combo$ComboName){
                #mininal_peak_length=50,
                peak_cutoff_pvalue=dt.parameter.combo[ComboName==SelectedCombo,pvalue_cutoff],#default 1e-5
                peak_cutoff_fdr = dt.parameter.combo[ComboName==SelectedCombo,fdr_cutoff],#If it is specified, then use "fdr" instead of "p" in peak calling
-               fold_enrichment=1            
+               fold_enrichment=1
   )
 }
 Sys.time() - t1
