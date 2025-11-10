@@ -77,6 +77,7 @@ Annot.gtf
 Annot.sqlite
 Annot.genome
 
+if(!dir.exists(outdir)){dir.create(outdir,recursive = T)}
 setwd(dir = outdir)
 if(SelectedCombo %in% dt.parameter.combo$ComboName){
   RunMACS2(MACS2_path = bin_path,

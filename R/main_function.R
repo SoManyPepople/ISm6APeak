@@ -262,6 +262,7 @@ runM6APeakS  <- function(
     n.cores=40,
     rm.inter=TRUE
 ){
+  options(scipen = 9)
   t1 <- Sys.time()
   if(!dir.exists(tmp.dir)){dir.create(tmp.dir,recursive = T)}
   if(!dir.exists(log.dir)){dir.create(log.dir,recursive = T)}
@@ -328,19 +329,21 @@ runM6APeakS  <- function(
       if(unique(dt.infer.strandness.res$Strandness == "R1")){
         dt.parameter.stranded.bam.parallel <- foreach(i=1:length(Samples),.combine='rbind')%do%{
           data.table(arg1=rep(4,2),#thread for samtools view
-                     arg2=rep("-b -h -F 64",2),
-                     arg3=c(InputBAMs[i], RIPBAMs[i]),
-                     arg4=paste0(tmp.dir,"/",Samples[i], c("_Input","_RIP"), ".R2.bam"),
-                     arg5=paste0(log.dir,"/",Samples[i], c("_Input","_RIP"), ".R2.log")
+                     arg2=rep("-F",2),
+                     arg3=rep("64", 2),
+                     arg4=c(InputBAMs[i], RIPBAMs[i]),
+                     arg5=paste0(tmp.dir,"/",Samples[i], c("_Input","_RIP"), ".R2.bam"),
+                     arg6=paste0(log.dir,"/",Samples[i], c("_Input","_RIP"), ".R2.log")
           )
         }
       }else if(unique(dt.infer.strandness.res$Strandness == "R2")){
         dt.parameter.stranded.bam.parallel <- foreach(i=1:length(Samples),.combine='rbind')%do%{
           data.table(arg1=rep(4,2),#thread for samtools view
-                     arg2=rep("-b -h -f 64",2),
-                     arg3=c(InputBAMs[i], RIPBAMs[i]),
-                     arg4=paste0(tmp.dir,"/",Samples[i], c("_Input","_RIP"), ".R1.bam"),
-                     arg5=paste0(log.dir,"/",Samples[i], c("_Input","_RIP"), ".R1.log")
+                     arg2=rep("-f",2),
+                     arg3=rep("64", 2),
+                     arg4=c(InputBAMs[i], RIPBAMs[i]),
+                     arg5=paste0(tmp.dir,"/",Samples[i], c("_Input","_RIP"), ".R1.bam"),
+                     arg6=paste0(log.dir,"/",Samples[i], c("_Input","_RIP"), ".R1.log")
           )
         }
       }else{
@@ -348,7 +351,7 @@ runM6APeakS  <- function(
       }
       fwrite(dt.parameter.stranded.bam.parallel, file=paste0(tmp.dir,"/parameter.stranded.bam.parallel.txt"),sep="\t",row.names = F,col.names=F)
       parallel.stranded.bam.cmd <- paste0("parallel -j ", floor(n.cores/5)," --will-cite -a ", paste0(tmp.dir,"/parameter.stranded.bam.parallel.txt") ," --colsep '\t' '", paste0(bin.dir,"samtools"),
-                                          " view --threads {1} {2} {3} -o {4} >{5} 2>&1 '")
+                                          " view --threads {1} -b -h {2} {3} {4} -o {5} >{6} 2>&1 '")
       system(command = parallel.stranded.bam.cmd, wait = T)
 
       #calculate stranded bam depth
