@@ -29,6 +29,8 @@ RunMeRIPtools <- function(Samples="HCC1NT",#one sample
   suppressMessages(require(foreach))
   suppressMessages(require(tidyverse))
   suppressMessages(require(data.table))
+  suppressMessages(require(mysterypackage))
+
   if(!dir.exists(OutputDir)){dir.create(OutputDir,recursive = T)}
   dir.tmp <- paste0(OutputDir,"/tmp")
   if(!dir.exists(dir.tmp)){dir.create(dir.tmp)}
