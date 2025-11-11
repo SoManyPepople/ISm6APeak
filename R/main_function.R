@@ -175,6 +175,20 @@ PeakIntensity.parallel <- function(n.cores=2,
   }
   return(peak_level_all)
 }
+#function to remove intron for long peak
+LongPeakRemoveIntron <- function(dt.peak = dt.MeTPeak.m6As %>% dplyr::filter(ComboName=="Combo2" & Sample=="HEK_NEB_mRNA1" & end-start>=5000),
+                                 genome_file="~/genome_db/STAR_index/STAR_hg38/chrNameLength.txt",
+                                 dt.intron=readRDS("/data/m6A_calling_strategy/Analysis/dt.intron.hg38.RDS")
+){
+  #sort input and intron
+  dt.input <- bedtoolsr::bt.sort(dt.peak,g = genome_file) %>% as.data.table()
+  dt.intron <- bedtoolsr::bt.sort(dt.intron,g = genome_file) %>% as.data.table()
+  dt.peak.rm.intron <- bedtoolsr::bt.subtract(a=dt.input,b=dt.intron,s=T) %>% as.data.table()
+  dt.peak.rm.intron <- dt.peak.rm.intron %>% group_by(V4) %>% mutate(SumWidth=sum(V3-V2)) %>% as.data.table()
+  attr(dt.peak.rm.intron,"groups") <- NULL
+  colnames(dt.peak.rm.intron) <- c(colnames(dt.peak),"SumWidth")
+  return(dt.peak.rm.intron)
+}
 
 #main function to run M6APeakS
 runM6APeakS  <- function(
@@ -423,7 +437,7 @@ runM6APeakS  <- function(
       }
       fwrite(dt.parameter.bedtools.parallel, file=paste0(tmp.dir,"/parameter.Method.bedtools.parallel.txt"),sep="\t",row.names = F,col.names=F)
       intensity.nthread <- max(floor(n.cores/(quantile(c(dt.stranded.BAM.Depth$Input,dt.stranded.BAM.Depth$RIP),0.75)/30)/8),1)
-      parallel.Method.bedtools.cmd <- paste0(bin.dir,"/parallel -j ", min(intensity.nthread,10)," --will-cite -a ", paste0(tmp.dir,"/parameter.Method.bedtools.parallel.txt") ," --colsep '\t' '", paste0(bin.dir,"/Rscript "),
+      parallel.Method.bedtools.cmd <- paste0("parallel -j ", min(intensity.nthread,10)," --will-cite -a ", paste0(tmp.dir,"/parameter.Method.bedtools.parallel.txt") ," --colsep '\t' '", paste0(bin.dir,"/Rscript "),
                                              paste0(script.dir,"/Rscript_bedtools_intensity.R")," {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14} {15} 1>{16}  2>&1 '")
       system(command = parallel.Method.bedtools.cmd, wait = T)
 
