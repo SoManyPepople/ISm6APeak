@@ -73,6 +73,7 @@ LoadPeakMethod <- function(Method=c("MACS2","MeRIPtools", "MeTPeak", "TRESS", "e
     } %>% mutate(Method=Method)
   }
 }
+#function to calculate peak intensity parallel
 PeakIntensity.parallel <- function(n.cores=2,
                                    peakbeds=list.files(path="~/Fetus_m6A/MACS2SMePeak/MACS2SMePeak",pattern = '^(FP).+(bed)$',full.names = T),
                                    names.peakbeds=strsplit(list.files(path="~/Fetus_m6A/MACS2SMePeak/MACS2SMePeak",pattern = '^(FP).+(bed)$',full.names = T), split="/", fixed=T) %>%
