@@ -11,7 +11,7 @@ LoadPeakMethod <- function(Method=c("MACS2","MeRIPtools", "MeTPeak", "TRESS", "e
     m6As <- list.files(path=Method.peak.dir, pattern="peaks.xls",full.names = T,recursive = T)
     names(m6As) <- Samples
     foreach(i = 1:length(m6As),.combine='rbind')%do%{
-      fread(file = m6As[i]) %>% dplyr::select(seqnames=chr,start,end,name,score=fold_enrichment) %>% mutate(strand="*") %>%
+      data.table::fread(file = m6As[i]) %>% dplyr::select(seqnames=chr,start,end,name,score=fold_enrichment) %>% mutate(strand="*") %>%
         mutate(name=paste(names(m6As)[i],"MACS2", seqnames, start, end, strand,sep="_")) %>%
         dplyr::select(seqnames,start,end,name,score,strand) %>% mutate(Sample=names(m6As)[i])
     } %>%  mutate(Method=Method)
@@ -22,7 +22,7 @@ LoadPeakMethod <- function(Method=c("MACS2","MeRIPtools", "MeTPeak", "TRESS", "e
     m6As <- list.files(path=Method.peak.dir, pattern="peak.xls",full.names = T,recursive = T) %>% grep(pattern="con_peak.xls",invert = T,value=T)
     names(m6As) <- Samples
     foreach(i = 1:length(m6As),.combine='rbind')%do%{
-      fread(file = m6As[i],header = T) %>% dplyr::mutate(seqnames=chr, start=chromStart, end=chromEnd, score=fold_enrchment) %>%
+      data.table::fread(file = m6As[i],header = T) %>% dplyr::mutate(seqnames=chr, start=chromStart, end=chromEnd, score=fold_enrchment) %>%
         mutate(name=paste(names(m6As)[i],"exomePeak", seqnames, start, end, strand,sep="_")) %>%
         dplyr::select(seqnames,start,end,name,score,strand) %>% mutate(Sample=names(m6As)[i])
     } %>% mutate(Method=Method)
@@ -33,7 +33,7 @@ LoadPeakMethod <- function(Method=c("MACS2","MeRIPtools", "MeTPeak", "TRESS", "e
     m6As <- list.files(path=Method.peak.dir, pattern="peaks.csv",full.names = T,recursive = T)
     names(m6As) <- Samples
     foreach(i = 1:length(m6As),.combine='rbind')%do%{
-      fread(file = m6As[i],header = T) %>% dplyr::mutate(seqnames=chr, start=chromStart, end=chromEnd, score=(RPM.IP+0.5)/(RPM.input+0.5)) %>%#add pseudocount 0.1
+      data.table::fread(file = m6As[i],header = T) %>% dplyr::mutate(seqnames=chr, start=chromStart, end=chromEnd, score=(RPM.IP+0.5)/(RPM.input+0.5)) %>%#add pseudocount 0.1
         dplyr::filter(RPM.IP>RPM.input) %>%
         mutate(name=paste(names(m6As)[i],"exomePeak2", seqnames, start, end, strand,sep="_")) %>%
         dplyr::select(seqnames,start,end,name,score,strand) %>% mutate(Sample=names(m6As)[i])
@@ -45,7 +45,7 @@ LoadPeakMethod <- function(Method=c("MACS2","MeRIPtools", "MeTPeak", "TRESS", "e
     m6As <- list.files(path=Method.peak.dir, pattern="peak.xls",full.names = T,recursive = T)
     names(m6As) <- Samples
     foreach(i = 1:length(m6As),.combine='rbind')%do%{
-      fread(file = m6As[i],header = T) %>% dplyr::mutate(seqnames=chr, start=chromStart, end=chromEnd, score=fold_enrchment) %>%
+      data.table::fread(file = m6As[i],header = T) %>% dplyr::mutate(seqnames=chr, start=chromStart, end=chromEnd, score=fold_enrchment) %>%
         mutate(name=paste(names(m6As)[i],"MeTPeak", seqnames, start, end, strand,sep="_")) %>%
         dplyr::select(seqnames,start,end,name,score,strand) %>% mutate(Sample=names(m6As)[i])
     } %>% mutate(Method=Method)
@@ -56,7 +56,7 @@ LoadPeakMethod <- function(Method=c("MACS2","MeRIPtools", "MeTPeak", "TRESS", "e
     m6As <- list.files(path=Method.peak.dir, pattern="peaks.xls",full.names = T,recursive = T)
     names(m6As) <- Samples
     foreach(i = 1:length(m6As),.combine='rbind')%do%{
-      fread(file = m6As[i],header = T) %>% dplyr::mutate(seqnames=chr, score=2^(as.numeric(lg.fc))) %>%
+      data.table::fread(file = m6As[i],header = T) %>% dplyr::mutate(seqnames=chr, score=2^(as.numeric(lg.fc))) %>%
         mutate(name=paste(names(m6As)[i],"TRESS", seqnames, start, end, strand,sep="_")) %>%
         dplyr::select(seqnames,start,end,name,score,strand) %>% mutate(Sample=names(m6As)[i])
     } %>% mutate(Method=Method)
@@ -67,7 +67,7 @@ LoadPeakMethod <- function(Method=c("MACS2","MeRIPtools", "MeTPeak", "TRESS", "e
     m6As <- list.files(path=Method.peak.dir, pattern="peak.tsv",full.names = T,recursive = T)
     names(m6As) <- Samples
     foreach(i = 1:length(m6As),.combine='rbind')%do%{
-      fread(file = m6As[i],header = T) %>% dplyr::mutate(seqnames=chr) %>%
+      data.table::fread(file = m6As[i],header = T) %>% dplyr::mutate(seqnames=chr) %>%
         mutate(name=paste(names(m6As)[i],"MeRIPtools", seqnames, start, end, strand,sep="_")) %>%
         dplyr::select(seqnames,start,end,name,score,strand) %>% mutate(Sample=names(m6As)[i])
     } %>% mutate(Method=Method)
@@ -127,7 +127,7 @@ PeakIntensity.parallel <- function(n.cores=2,
     if(no.RIP == length(Samples)){
       message(paste0("Finished RIP coverage calculation!\nfilter bins according to RIP coverage...\n",  Sys.time()))
       for(k in 1:length(Samples)){
-        RIP_cov <- fread(paste0(out.tmp,"/", Samples[k],"_RIP_coverage.txt"),sep="\t",header=F,nThread = floor(72/n.cores))
+        RIP_cov <- data.table::fread(paste0(out.tmp,"/", Samples[k],"_RIP_coverage.txt"),sep="\t",header=F,nThread = floor(72/n.cores))
         colnames(RIP_cov) <- c("chr","start","end","name","score","strand","Cov")
         filtered_bins <- RIP_cov %>% dplyr::filter(Cov>=RIP_coverage_cutoff)
         if(nrow(filtered_bins)>0){
@@ -163,8 +163,8 @@ PeakIntensity.parallel <- function(n.cores=2,
   if(min(no.Input,no.RIP) == length(Samples)){
     message(paste0("Finished coverage calculation!\nStart peak intensity calculation...\n",  Sys.time()))
     peak_level_all <- foreach(j = 1:length(Samples),.combine='rbind')%do%{
-      Input_cov <- fread(paste0(out.tmp,"/", Samples[j],"_Input_coverage.txt"),sep="\t",header=F,nThread = floor(72/n.cores)) %>% mutate(Cov.norm=V7/Input.Depth[j])
-      RIP_cov <- fread(paste0(out.tmp,"/", Samples[j],"_RIP_coverage.txt"),sep="\t",header=F,nThread = floor(72/n.cores)) %>% mutate(Cov.norm=V7/RIP.Depth[j])
+      Input_cov <- data.table::fread(paste0(out.tmp,"/", Samples[j],"_Input_coverage.txt"),sep="\t",header=F,nThread = floor(72/n.cores)) %>% mutate(Cov.norm=V7/Input.Depth[j])
+      RIP_cov <- data.table::fread(paste0(out.tmp,"/", Samples[j],"_RIP_coverage.txt"),sep="\t",header=F,nThread = floor(72/n.cores)) %>% mutate(Cov.norm=V7/RIP.Depth[j])
       colnames(Input_cov) <- colnames(RIP_cov) <- c("chr","start","end","name","score","strand","Cov","Cov.norm")
       peak_level <- inner_join(x=Input_cov,y=RIP_cov,by=c("chr","start","end","name","score","strand"),suffix=c(".Input",".RIP")) %>%
         as.data.table() %>% mutate(intensity=(Cov.norm.RIP+pseudo_count)/(Cov.norm.Input+pseudo_count))
@@ -264,7 +264,7 @@ runM6APeakS  <- function(
     message(paste0("[",Sys.time(),"] ","step 0.3 pull out stranded reads which is reverse to the mRNA"))
     dt.infer.strandness.res <- foreach(i=1:length(Samples),.combine='rbind')%do%{
       foreach(j=c("Input","RIP"),.combine='rbind')%do%{
-        dt.res <- fread(paste0(tmp.dir,"/",Samples[i],"_", j, "_infer.strandness.tsv"))
+        dt.res <- data.table::fread(paste0(tmp.dir,"/",Samples[i],"_", j, "_infer.strandness.tsv"))
         if(sum(str_detect(dt.res$V6,pattern=fixed("2++,2--")))>0){
           Library <- "PE"
           if(dt.res[str_detect(V6,fixed("2++,2--")),V7]>=0.5){Strandness <- "R2"}else{
@@ -339,7 +339,7 @@ runM6APeakS  <- function(
       #step 1. Run each method to call peaks
       #according to selected Model and FPR cutoff, determine the selected method combo and option
       if(!file.exists(ModelCutoffTable)){message(paste0("Error! Can't find model cutoff table file at ", ModelCutoffTable))}
-      dt.method.combo.model <- fread(ModelCutoffTable,header = T) %>% dplyr::filter(M6APeakModel==selectedModel)
+      dt.method.combo.model <- data.table::fread(ModelCutoffTable,header = T) %>% dplyr::filter(M6APeakModel==selectedModel)
       if(is.null(Model.FPR.cutoff)){
         dt.method.combo.selected <- dt.method.combo.model %>% dplyr::filter(Mode=="Moderate")}else{
           if(is.numeric(Model.FPR.cutoff)){
@@ -459,7 +459,7 @@ runM6APeakS  <- function(
           names(intensity.files) <- list.files(tmp.dir,pattern = paste0(M,"__",combo),full.names = F) %>% grep(pattern="(_bedtools_intensity.tsv)$",value=T) %>%
             strsplit(split="__",fixed=T) %>% sapply("[",1)
           intensity.files <- intensity.files[Samples]
-          dt.intensity <- foreach(s=names(intensity.files),.combine='rbind')%do%{fread(file = intensity.files[s]) %>% mutate(Sample=s)}#load intensity for all sample
+          dt.intensity <- foreach(s=names(intensity.files),.combine='rbind')%do%{data.table::fread(file = intensity.files[s]) %>% mutate(Sample=s)}#load intensity for all sample
           dt.intensity <- dt.intensity %>% dplyr::select(name,Sample,pos,neg)
           #pull out m6a with intensity higher than cutoff at FPR20
           #filtered and un overlapped  m6a at pos strand
@@ -502,12 +502,12 @@ runM6APeakS  <- function(
           if(nrow(dt.m6a.filtered)>0){
             #calculate exonic sum width to filter extreme long peak (<=6kb)
             dt.m6a.filtered.sumwidth <- LongPeakRemoveIntron(dt.peak = dt.m6a.filtered %>% distinct(seqnames,start,end,name,score,strand),#unique m6a peak
-                                                             dt.intron = fread(org.intron.bed),
+                                                             dt.intron = data.table::fread(org.intron.bed),
                                                              genome_file = org.genome_file)
             dt.m6a.filtered <- dt.m6a.filtered %>% left_join(x=.,y=dt.m6a.filtered.sumwidth  %>% dplyr::distinct(name,SumWidth), by=c("name")) %>%
               dplyr::mutate(SumWidth=case_when(is.na(SumWidth) ~ 0, .default = SumWidth))
             #the overlap gene
-            dt.m6a.filtered.overlapped.gene <- bedtoolsr::bt.intersect(a=dt.m6a.filtered, b=fread(org.genebed),
+            dt.m6a.filtered.overlapped.gene <- bedtoolsr::bt.intersect(a=dt.m6a.filtered, b=data.table::fread(org.genebed),
                                                             s=T, f=0.5, F=0.8, c=T,e = T) %>% as.data.table()
             dt.m6a.filtered <- dt.m6a.filtered %>% left_join(x=.,y=dt.m6a.filtered.overlapped.gene %>% dplyr::select(name=V4,Sample=V7,OverlappedNoGene=V9) %>%
                                                                dplyr::distinct(Sample,name,OverlappedNoGene), by=c("Sample","name"))
@@ -549,25 +549,25 @@ runM6APeakS  <- function(
         dt.m6a.filtered <- rbind(dt.m6a.filtered.pos.merged, dt.m6a.filtered.neg.merged)
         #calculate exonic sum width to filter extreme long peak (<=6kb)
         dt.m6a.filtered.sumwidth <- LongPeakRemoveIntron(dt.peak = dt.m6a.filtered %>% distinct(seqnames,start,end,name,score,strand),
-                                                         dt.intron = fread(org.intron.bed),
+                                                         dt.intron = data.table::fread(org.intron.bed),
                                                          genome_file = org.genome_file)
         dt.m6a.filtered <- dt.m6a.filtered %>% left_join(x=.,y=dt.m6a.filtered.sumwidth  %>% dplyr::distinct(name,SumWidth), by=c("name")) %>%
           dplyr::mutate(SumWidth=case_when(is.na(SumWidth) ~ 0, .default = SumWidth))
         #check the overlapped gene count of merged m6a
         # gene.bed.file <- "/data/m6A_calling_strategy/RIPPeakS_resource/mm39_gencode.gene.bed"
-        dt.m6a.filtered.overlapped.gene <- bedtoolsr::bt.intersect(a=dt.m6a.filtered, b=fread(org.genebed),s=T, f=0.5, F=0.8, c=T,e = T) %>% as.data.table()
+        dt.m6a.filtered.overlapped.gene <- bedtoolsr::bt.intersect(a=dt.m6a.filtered, b=data.table::fread(org.genebed),s=T, f=0.5, F=0.8, c=T,e = T) %>% as.data.table()
         #dt.m6a.filtered.overlapped.gene[,.N,by=.(Sample=V7,nGene=V9)] %>% dplyr::arrange(Sample,nGene)
         #filter out merged peak with more than two genes and exonic width over 3kb
         dt.m6a.notkept <- dt.m6a.filtered.overlapped.gene[V9>2 & V8>3000,]
         #dt.m6a.notkept <- dt.m6a.filtered.overlapped.gene[V9>1,]
         dt.m6a.filtered <- dt.m6a.filtered %>% dplyr::filter(!name %in% dt.m6a.notkept$V4) %>% dplyr::filter(str_detect(seqnames,"chr")) #key filtering
-        dt.m6a.overlapgene <- bedtoolsr::bt.intersect(a=dt.m6a.filtered, b=fread(org.genebed),s=T, f=0.5, F=0.8, wo=T,e = T) %>% as.data.table()
+        dt.m6a.overlapgene <- bedtoolsr::bt.intersect(a=dt.m6a.filtered, b=data.table::fread(org.genebed),s=T, f=0.5, F=0.8, wo=T,e = T) %>% as.data.table()
         #obtain the intersect of GLORI_mESC m6a site
         if(!is.null(org.benchmark.bed)){
           if(file.exists(org.benchmark.bed)){
-            dt.m6a.overlap <- bedtoolsr::bt.intersect(a=dt.m6a.filtered, b=fread(org.benchmark.bed)[,1:6], s=T, wo=T) %>% as.data.table() %>% distinct()
-            dt.benchmark.sites <- fread(org.benchmark.bed)[,c(1:6,9)]
-            dt.benchmark.gene <- fread(org.benchmark.bed)[,c(1:6,9)] %>% dplyr::rename(OverlappedGenes=V9) %>%
+            dt.m6a.overlap <- bedtoolsr::bt.intersect(a=dt.m6a.filtered, b=data.table::fread(org.benchmark.bed)[,1:6], s=T, wo=T) %>% as.data.table() %>% distinct()
+            dt.benchmark.sites <- data.table::fread(org.benchmark.bed)[,c(1:6,9)]
+            dt.benchmark.gene <- data.table::fread(org.benchmark.bed)[,c(1:6,9)] %>% dplyr::rename(OverlappedGenes=V9) %>%
               tidyr::separate_longer_delim(OverlappedGenes,delim = "|") %>% as.data.table()
             benchmark.gene <- unique(dt.benchmark.gene[OverlappedGenes!="",OverlappedGenes])
             #calculate TPR and FPR
