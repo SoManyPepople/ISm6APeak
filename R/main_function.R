@@ -222,6 +222,7 @@ runM6APeakS  <- function(
     suppressMessages(library(p,character.only=T,verbose=F))
   }
   options(scipen = 9)
+  options(datatable.eval.env = parent.frame())
   options(bedtools.path = bin.dir)
   if(!dir.exists(out.dir)){dir.create(out.dir,recursive = T)}
   tmp.dir <- paste0(out.dir,"/tmp")
@@ -270,8 +271,8 @@ runM6APeakS  <- function(
         print(str(dt.res))
         if(sum(str_detect(dt.res$V6,pattern=fixed("2++,2--")))>0){
           Library <- "PE"
-          if(dt.res[str_detect(V6,fixed("2++,2--")),"V7"]>=0.5){Strandness <- "R2"}else{
-            if(dt.res[str_detect(V6,fixed("1++,1--")),"V7"]>=0.5){Strandness <- "R1"}else{
+          if(dt.res[str_detect(dt.res$V6,fixed("2++,2--")),"V7"]>=0.5){Strandness <- "R2"}else{
+            if(dt.res[str_detect(dt.res$V6,fixed("1++,1--")),"V7"]>=0.5){Strandness <- "R1"}else{
               Strandness <- "unstranded"
             }
           }
