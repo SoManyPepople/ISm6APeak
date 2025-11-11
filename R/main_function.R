@@ -1,4 +1,78 @@
 
+
+#function to load m6As from each method
+LoadPeakMethod <- function(Method=c("MACS2","MeRIPtools", "MeTPeak", "TRESS", "exomePeak2", "exomePeak")[5],
+                           Method.peak.dir=paste0("/data/m6A_calling_strategy/RIPPeakS/",c("MACS2","MeRIPtools", "MeTPeak", "TRESS", "exomePeak2", "exomePeak")[5],"_Abcam"))
+{
+  if(Method=="MACS2"){
+    message(paste0("start load  m6a of ", Method))
+    Samples <- list.files(path=Method.peak.dir, pattern="peaks.xls",full.names = F,recursive = T) %>%
+      str_replace(pattern="_peaks.xls",replacement = "")
+    m6As <- list.files(path=Method.peak.dir, pattern="peaks.xls",full.names = T,recursive = T)
+    names(m6As) <- Samples
+    foreach(i = 1:length(m6As),.combine='rbind')%do%{
+      fread(file = m6As[i]) %>% dplyr::select(seqnames=chr,start,end,name,score=fold_enrichment) %>% mutate(strand="*") %>%
+        mutate(name=paste(names(m6As)[i],"MACS2", seqnames, start, end, strand,sep="_")) %>%
+        dplyr::select(seqnames,start,end,name,score,strand) %>% mutate(Sample=names(m6As)[i])
+    } %>%  mutate(Method=Method)
+  }else if(Method=="exomePeak"){
+    message(paste0("start load  m6a of ", Method))
+    Samples <- list.files(path=Method.peak.dir, pattern="peak.xls",full.names = T,recursive = T) %>% grep(pattern="con_peak.xls",invert = T,value=T) %>%
+      strsplit(split="/") %>% sapply(tail,2,simplify = F) %>% sapply(head,1)
+    m6As <- list.files(path=Method.peak.dir, pattern="peak.xls",full.names = T,recursive = T) %>% grep(pattern="con_peak.xls",invert = T,value=T)
+    names(m6As) <- Samples
+    foreach(i = 1:length(m6As),.combine='rbind')%do%{
+      fread(file = m6As[i],header = T) %>% dplyr::mutate(seqnames=chr, start=chromStart, end=chromEnd, score=fold_enrchment) %>%
+        mutate(name=paste(names(m6As)[i],"exomePeak", seqnames, start, end, strand,sep="_")) %>%
+        dplyr::select(seqnames,start,end,name,score,strand) %>% mutate(Sample=names(m6As)[i])
+    } %>% mutate(Method=Method)
+  }else if(Method=="exomePeak2"){
+    message(paste0("start load  m6a of ", Method))
+    Samples <- list.files(path=Method.peak.dir, pattern="peaks.csv",full.names = T,recursive = T) %>%
+      strsplit(split="/") %>% sapply(tail,2,simplify = F) %>% sapply(head,1) %>% strsplit(split="__",fixed=T) %>% sapply("[",1)
+    m6As <- list.files(path=Method.peak.dir, pattern="peaks.csv",full.names = T,recursive = T)
+    names(m6As) <- Samples
+    foreach(i = 1:length(m6As),.combine='rbind')%do%{
+      fread(file = m6As[i],header = T) %>% dplyr::mutate(seqnames=chr, start=chromStart, end=chromEnd, score=(RPM.IP+0.5)/(RPM.input+0.5)) %>%#add pseudocount 0.1
+        dplyr::filter(RPM.IP>RPM.input) %>%
+        mutate(name=paste(names(m6As)[i],"exomePeak2", seqnames, start, end, strand,sep="_")) %>%
+        dplyr::select(seqnames,start,end,name,score,strand) %>% mutate(Sample=names(m6As)[i])
+    } %>% mutate(Method=Method)
+  }else if(Method=="MeTPeak"){
+    message(paste0("start load  m6a of ", Method))
+    Samples <- list.files(path=Method.peak.dir, pattern="peak.xls",full.names = T,recursive = T) %>%
+      strsplit(split="/") %>% sapply(tail,2,simplify = F) %>% sapply(head,1)
+    m6As <- list.files(path=Method.peak.dir, pattern="peak.xls",full.names = T,recursive = T)
+    names(m6As) <- Samples
+    foreach(i = 1:length(m6As),.combine='rbind')%do%{
+      fread(file = m6As[i],header = T) %>% dplyr::mutate(seqnames=chr, start=chromStart, end=chromEnd, score=fold_enrchment) %>%
+        mutate(name=paste(names(m6As)[i],"MeTPeak", seqnames, start, end, strand,sep="_")) %>%
+        dplyr::select(seqnames,start,end,name,score,strand) %>% mutate(Sample=names(m6As)[i])
+    } %>% mutate(Method=Method)
+  }else if(Method=="TRESS"){
+    message(paste0("start load  m6a of ", Method))
+    Samples <- list.files(path=Method.peak.dir, pattern="peaks.xls",full.names = T,recursive = T) %>%
+      strsplit(split="/") %>% sapply(tail,1) %>% str_replace(pattern="_peaks.xls",replacement="")
+    m6As <- list.files(path=Method.peak.dir, pattern="peaks.xls",full.names = T,recursive = T)
+    names(m6As) <- Samples
+    foreach(i = 1:length(m6As),.combine='rbind')%do%{
+      fread(file = m6As[i],header = T) %>% dplyr::mutate(seqnames=chr, score=2^(as.numeric(lg.fc))) %>%
+        mutate(name=paste(names(m6As)[i],"TRESS", seqnames, start, end, strand,sep="_")) %>%
+        dplyr::select(seqnames,start,end,name,score,strand) %>% mutate(Sample=names(m6As)[i])
+    } %>% mutate(Method=Method)
+  }else if(Method=="MeRIPtools"){
+    message(paste0("start load  m6a of ", Method))
+    Samples <- list.files(path=Method.peak.dir, pattern="peak.tsv",full.names = T,recursive = T) %>%
+      strsplit(split="/") %>% sapply(tail,1) %>% str_replace(pattern="_peak.tsv",replacement="")
+    m6As <- list.files(path=Method.peak.dir, pattern="peak.tsv",full.names = T,recursive = T)
+    names(m6As) <- Samples
+    foreach(i = 1:length(m6As),.combine='rbind')%do%{
+      fread(file = m6As[i],header = T) %>% dplyr::mutate(seqnames=chr) %>%
+        mutate(name=paste(names(m6As)[i],"MeRIPtools", seqnames, start, end, strand,sep="_")) %>%
+        dplyr::select(seqnames,start,end,name,score,strand) %>% mutate(Sample=names(m6As)[i])
+    } %>% mutate(Method=Method)
+  }
+}
 #main function to run M6APeakS
 runM6APeakS  <- function(
     InputBAMs=list.files(path="/data/m6A_calling_strategy/7_MACS2SPeak/BAM/",pattern = "HEK",full.names = T) %>%
@@ -7,9 +81,9 @@ runM6APeakS  <- function(
     RIPBAMs=list.files(path="/data/m6A_calling_strategy/7_MACS2SPeak/BAM/",pattern = "HEK",full.names = T) %>%
       grep(pattern="RIP",value=T) %>% grep(pattern="Abcam", value=T, invert = F) %>% grep(pattern="test",value=T,invert = F) %>%
       grep(pattern="bai",value=T,invert=T),
-    tmp.dir="/data/m6A_calling_strategy/M6APeakS_Abcam/tmp/",
+    # tmp.dir="/data/m6A_calling_strategy/M6APeakS_Abcam/tmp/",
     bin.dir="/home/huangp/anaconda3/envs/m6A_seq/bin/",#absolute path
-    log.dir="/data/m6A_calling_strategy/M6APeakS_Abcam/log",
+    # log.dir="/data/m6A_calling_strategy/M6APeakS_Abcam/log",
     out.dir="/data/m6A_calling_strategy/M6APeakS_Abcam/",
     script.dir="/data/m6A_calling_strategy/Script/",
     Organism="Human",
@@ -26,9 +100,12 @@ runM6APeakS  <- function(
     rm.inter=TRUE
 ){
   options(scipen = 9)
-  t1 <- Sys.time()
+  if(!dir.exists(out.dir)){dir.create(out.dir,recursive = T)}
+  tmp.dir <- paste0(out.dir,"/tmp")
+  log.dir <- paste0(log.dir,"/log")
   if(!dir.exists(tmp.dir)){dir.create(tmp.dir,recursive = T)}
   if(!dir.exists(log.dir)){dir.create(log.dir,recursive = T)}
+  t1 <- Sys.time()
   #step 0. obtain the samples, infer and calculate depth
   message(paste0("[",Sys.time(),"] ","step 0.1 keep paired samples"))
   #0.1 paired samples with input and rip
