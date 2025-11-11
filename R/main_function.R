@@ -218,6 +218,7 @@ runM6APeakS  <- function(
     rm.inter=TRUE
 ){
   options(scipen = 9)
+  options(bedtools.path = bin.dir)
   if(!dir.exists(out.dir)){dir.create(out.dir,recursive = T)}
   tmp.dir <- paste0(out.dir,"/tmp")
   log.dir <- paste0(out.dir,"/log")
