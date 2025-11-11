@@ -8,7 +8,7 @@ require(foreach)
 require(doParallel)
 require(IRanges)
 require(bedtoolsr)
-
+require(mysterypackage)
 #bedtools intensity for one sample
 BedtoolsIntensity <- function(input.m6a.sample = "/data/m6A_calling_strategy/M6APeakS_Abcam/tmp/MACS2_Combo5_bedtools_intensity_input_m6A_HEK_Abcam_mRNA1.tsv",
                               prefix="HEK_SYSY_mRNA1",
