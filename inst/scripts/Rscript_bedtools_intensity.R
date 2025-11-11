@@ -29,17 +29,6 @@ BedtoolsIntensity <- function(input.m6a.sample = "/data/m6A_calling_strategy/M6A
   if(!dir.exists(dir.tmp)){dir.create(dir.tmp)}
   #collect both strand m6a
   dt.input.m6a <- fread(input.m6a.sample,header=T)
-  # dt.input.m6a <- rbind(dt.input.m6a %>% mutate(strand = "+"), dt.input.m6a %>% mutate(strand = "-")) %>% dplyr::arrange(seqnames,start,end,strand)
-  # dt.m6a.sample.sorted <- bedtoolsr::bt.sort(dt.input.m6a) %>% as.data.table()
-  # colnames(dt.m6a.sample.sorted) <- colnames(dt.input.m6a)
-  # dt.m6a.sample.merge <- rbind(
-  #   bedtoolsr::bt.merge(dt.m6a.sample.sorted %>% dplyr::filter(strand=="+"),s = T,d = 5, c=5, o="mean") %>% as.data.table() %>%
-  #     mutate(seqnames=V1,start=V2,end=V3,strand="+",score=V4) %>% mutate(name=paste(seqnames,start,end,strand,sep="_")) %>%
-  #     dplyr::select(seqnames,start,end,name,score,strand),
-  #   bedtoolsr::bt.merge(dt.m6a.sample.sorted %>% dplyr::filter(strand=="-"),s = T,d = 5, c=5, o="mean") %>% as.data.table() %>%
-  #     mutate(seqnames=V1,start=V2,end=V3,strand="-",score=V4) %>% mutate(name=paste(seqnames,start,end,strand,sep="_")) %>%
-  #     dplyr::select(seqnames,start,end,name,score,strand)
-  # )
   dt.m6a.both.strand <- rbind(dt.input.m6a %>% mutate(strand = "+"), dt.input.m6a %>% mutate(strand = "-")) %>% dplyr::arrange(seqnames,start,end,strand)
   #intron removed if yes
   if(intronremoved){

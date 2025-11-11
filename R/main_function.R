@@ -73,6 +73,108 @@ LoadPeakMethod <- function(Method=c("MACS2","MeRIPtools", "MeTPeak", "TRESS", "e
     } %>% mutate(Method=Method)
   }
 }
+PeakIntensity.parallel <- function(n.cores=2,
+                                   peakbeds=list.files(path="~/Fetus_m6A/MACS2SMePeak/MACS2SMePeak",pattern = '^(FP).+(bed)$',full.names = T),
+                                   names.peakbeds=strsplit(list.files(path="~/Fetus_m6A/MACS2SMePeak/MACS2SMePeak",pattern = '^(FP).+(bed)$',full.names = T), split="/", fixed=T) %>%
+                                     sapply(tail,1) %>% strsplit(split="_MACS2SMePeak",fixed=T) %>% sapply("[",1),
+                                   InputBAM=list.files(path="/data/m6A_calling_strategy/7_MACS2SPeak/BAM", pattern = '^(HEK).+(Input).+(UN).+(bam)$',full.names = T),
+                                   names.Input=list.files(path="/data/m6A_calling_strategy/7_MACS2SPeak/BAM", pattern = '^(HEK).+(Input).+(UN).+(bam)$',full.names = F) %>%
+                                     strsplit(split=".",fixed=T) %>% sapply("[",1) %>% gsub(pattern="_Input",replacement=""),
+                                   RIPBAM=list.files(path="/data/m6A_calling_strategy/7_MACS2SPeak/BAM", pattern = '^(HEK).+(RIP).+(UN).+(bam)$',full.names = T),
+                                   names.RIP=list.files(path="/data/m6A_calling_strategy/7_MACS2SPeak/BAM", pattern = '^(HEK).+(RIP).+(UN).+(bam)$',full.names = F) %>%
+                                     strsplit(split=".",fixed=T) %>% sapply("[",1) %>% gsub(pattern="_RIP",replacement=""),
+                                   Depth=dt.BAM.Depth$Mapped,
+                                   names.Depth=dt.BAM.Depth$Sample,
+                                   out.tmp="/data/m6A_calling_strategy/SlidingWindow/tmp",
+                                   bedtools_path = "~/anaconda3/envs/m6A_seq/bin",
+                                   bt_coverage.options=" -split -mean ",
+                                   genome_file="~/genome_db/STAR_index/STAR_hg38/chrNameLength.txt",
+                                   strandness = c("s", "S", "unstranded"),
+                                   pseudo_count=0.1,
+                                   foldchange_cutoff=1,
+                                   RIP_coverage_cutoff=2){
+  #write commandline
+  require(foreach)
+  require(data.table)
+  require(dplyr)
+  if(!dir.exists(out.tmp)){dir.create(out.tmp,recursive = T)}
+  #obtain the intersect sample name
+  Samples <- Reduce(intersect, list(names.peakbeds, names.Input, names.RIP,
+                                    gsub(names.Depth,pattern="_Input",replacement=""), gsub(names.Depth,pattern="_RIP",replacement="")))
+  n.cores <- min(c(n.cores, length(Samples)*2))
+  peakbeds <- peakbeds[match(Samples,names.peakbeds)]
+  InputBAM <- InputBAM[match(Samples,names.Input)]
+  RIPBAM <- RIPBAM[match(Samples,names.RIP)]
+  Input.Depth <- Depth[match(paste0(Samples,"_Input"), names.Depth)]
+  RIP.Depth <- Depth[match(paste0(Samples,"_RIP"), names.Depth)]
+  #determine bt_coverage.options
+  if(strandness != "unstranded"){ bt_coverage.options <- paste0(bt_coverage.options, "-", strandness, " ")}
+  #sort input bed files
+
+  if(RIP_coverage_cutoff>0){
+    #bash command to perform bedtools coverage in RIP samples first (keep bins with at lest RIP_coverage_cutoff=2)
+    #build parameter table for GNU parallel
+    dt.parameter.RIP <- foreach(i = 1:length(Samples), .combine='rbind')%do%{
+      data.table(a=peakbeds[i], b=RIPBAM[i], o=paste0(out.tmp,"/",Samples[i], "_RIP_coverage.txt"))
+    }
+    fwrite(dt.parameter.RIP, file=paste0(out.tmp,"/RIP_parallel_bedtools_parameter_table.txt"),sep="\t",row.names = F,col.names=F)
+    parallel_cmd.RIP <- paste0("parallel -j ", n.cores," --will-cite -a ", out.tmp, "/RIP_parallel_bedtools_parameter_table.txt --colsep '\t' '",
+                               bedtools_path,"/bedtools coverage  -g ", genome_file, bt_coverage.options, " -a {1} -b {2} 1>{3} 2>/dev/null '")
+    system(command = parallel_cmd.RIP, wait = T)
+    #determine the accomplishment of the bedtools coverage
+    no.RIP <- system(command = paste0("ls  ",out.tmp, "/*_RIP_coverage.txt | wc -l"),wait = T,intern = T) %>% as.integer()
+    if(no.RIP == length(Samples)){
+      message(paste0("Finished RIP coverage calculation!\nfilter bins according to RIP coverage...\n",  Sys.time()))
+      for(k in 1:length(Samples)){
+        RIP_cov <- fread(paste0(out.tmp,"/", Samples[k],"_RIP_coverage.txt"),sep="\t",header=F,nThread = floor(72/n.cores))
+        colnames(RIP_cov) <- c("chr","start","end","name","score","strand","Cov")
+        filtered_bins <- RIP_cov %>% dplyr::filter(Cov>=RIP_coverage_cutoff)
+        if(nrow(filtered_bins)>0){
+          fwrite(filtered_bins[,1:6],file=paste0(out.tmp, "/", Samples[k], "_filtered_bins.bed"), row.names = F, col.names=F, sep="\t",nThread = floor(72/n.cores))}else{
+            Samples <- Samples[Samples != Samples[k]]
+          }
+      }
+    }
+    rm(k)
+    #estimate intensity for filtered bins
+    #build parameter table
+    dt.parameter.InputRIP <- foreach(k1=1:length(Samples),.combine ='rbind')%do%{
+      if(file.exists(paste0(out.tmp, "/", Samples[k1], "_filtered_bins.bed"))){
+        data.table(a=rep(paste0(out.tmp, "/", Samples[k1], "_filtered_bins.bed"),2),
+                   b=c(InputBAM[k1],RIPBAM[k1]), c=paste0(out.tmp, "/", Samples[k1], "_", c("Input","RIP"),"_coverage.txt"))
+      }
+    }
+  }else{
+    #estimate intensity for filtered bins
+    #build parameter table
+    dt.parameter.InputRIP <- foreach(k1=1:length(Samples),.combine ='rbind')%do%{
+      data.table(a=rep(peakbeds[k1],2), b=c(InputBAM[k1],RIPBAM[k1]), c=paste0(out.tmp, "/", Samples[k1], "_", c("Input","RIP"),"_coverage.txt"))
+    }
+  }
+  fwrite(dt.parameter.InputRIP, file=paste0(out.tmp,"/InputRIP_parallel_bedtools_parameter_table.txt"),sep="\t",row.names = F,col.names=F)
+  parallel_cmd.InputRIP <- paste0("parallel -j ", n.cores," --will-cite -a ", out.tmp, "/InputRIP_parallel_bedtools_parameter_table.txt --colsep '\t' '",
+                                  bedtools_path,"/bedtools coverage -g ", genome_file, bt_coverage.options, " -a {1} -b {2} 1>{3} 2>/dev/null '")
+  system(command = parallel_cmd.InputRIP, wait = T)
+
+  #determine the accomplishment of the bedtools coverage
+  no.Input <- system(command = paste0("ls  ",out.tmp, "/*_Input_coverage.txt | wc -l"),wait = T,intern = T) %>% as.integer()
+  no.RIP <- system(command = paste0("ls  ",out.tmp, "/*_RIP_coverage.txt | wc -l"),wait = T,intern = T) %>% as.integer()
+  if(min(no.Input,no.RIP) == length(Samples)){
+    message(paste0("Finished coverage calculation!\nStart peak intensity calculation...\n",  Sys.time()))
+    peak_level_all <- foreach(j = 1:length(Samples),.combine='rbind')%do%{
+      Input_cov <- fread(paste0(out.tmp,"/", Samples[j],"_Input_coverage.txt"),sep="\t",header=F,nThread = floor(72/n.cores)) %>% mutate(Cov.norm=V7/Input.Depth[j])
+      RIP_cov <- fread(paste0(out.tmp,"/", Samples[j],"_RIP_coverage.txt"),sep="\t",header=F,nThread = floor(72/n.cores)) %>% mutate(Cov.norm=V7/RIP.Depth[j])
+      colnames(Input_cov) <- colnames(RIP_cov) <- c("chr","start","end","name","score","strand","Cov","Cov.norm")
+      peak_level <- inner_join(x=Input_cov,y=RIP_cov,by=c("chr","start","end","name","score","strand"),suffix=c(".Input",".RIP")) %>%
+        as.data.table() %>% mutate(intensity=(Cov.norm.RIP+pseudo_count)/(Cov.norm.Input+pseudo_count))
+      message(paste0("Finished the ",j, "/", length(Samples)))
+      peak_level %>% mutate(Sample = Samples[j]) %>% dplyr::filter(intensity > foldchange_cutoff)
+    }
+    message(paste0("Finished intensity calculation!\n",  Sys.time()))
+  }
+  return(peak_level_all)
+}
+
 #main function to run M6APeakS
 runM6APeakS  <- function(
     InputBAMs=list.files(path="/data/m6A_calling_strategy/7_MACS2SPeak/BAM/",pattern = "HEK",full.names = T) %>%
@@ -102,7 +204,7 @@ runM6APeakS  <- function(
   options(scipen = 9)
   if(!dir.exists(out.dir)){dir.create(out.dir,recursive = T)}
   tmp.dir <- paste0(out.dir,"/tmp")
-  log.dir <- paste0(log.dir,"/log")
+  log.dir <- paste0(out.dir,"/log")
   if(!dir.exists(tmp.dir)){dir.create(tmp.dir,recursive = T)}
   if(!dir.exists(log.dir)){dir.create(log.dir,recursive = T)}
   t1 <- Sys.time()
