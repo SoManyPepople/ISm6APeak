@@ -259,16 +259,7 @@ runM6APeakS  <- function(
     parallel.infer.strandness.cmd <- paste0("parallel -j ", floor(n.cores/4)," --will-cite -a ", paste0(tmp.dir,"/parameter.infer.strandness.parallel.txt") ," --colsep '\t' '", paste0(bin.dir,"infer_experiment.py"),
                                             " -s {1} -r {2} -i {3} 1>{4} 2>&1 '")
     system(command = parallel.infer.strandness.cmd, wait = T)
-    #0.3 bam index as input for exomePeak and MeTPeak (run bam index to wait forinfer strandness finished )
-    message(paste0("[",Sys.time(),"] ","step 0.3 bam index"))
-    #build parameter table for parallel
-    dt.parameter.bai.parallel <- foreach(i=1:length(Samples),.combine='rbind')%do%{
-      data.table(arg1=c(InputBAMs[i],RIPBAMs[i]))
-    }
-    fwrite(dt.parameter.bai.parallel, file=paste0(tmp.dir,"/parameter.bam.index.parallel.txt"),sep="\t",row.names = F,col.names=F)
-    parallel.bai.cmd <- paste0("parallel -j ", floor(n.cores/4)," --will-cite -a ", paste0(tmp.dir,"/parameter.bam.index.parallel.txt") ," --colsep '\t' '", paste0(bin.dir,"samtools"),
-                               " index {1} 2>&1 '")
-    system(command = parallel.bai.cmd, wait = T)
+
     #0.4 pull out stranded reads which is reverse to the mRNA
     message(paste0("[",Sys.time(),"] ","step 0.4 pull out stranded reads which is reverse to the mRNA"))
     dt.infer.strandness.res <- foreach(i=1:length(Samples),.combine='rbind')%do%{
@@ -333,6 +324,17 @@ runM6APeakS  <- function(
         tidyr::pivot_wider(id_cols = c("Replicate"),names_from = c("Library"),values_from = c("Mapped")) %>% as.data.table() %>%
         mutate(RIPLibraryScaleFactor=paste0(round(RIP,2),"/",round(Input,2)))
       print(dt.stranded.BAM.Depth)
+
+      #0.4 bam index as input for exomePeak and MeTPeak (run bam index to wait forinfer strandness finished )
+      message(paste0("[",Sys.time(),"] ","step 0.4 bam index"))
+      #build parameter table for parallel
+      dt.parameter.bai.parallel <- foreach(i=1:length(Samples),.combine='rbind')%do%{
+        data.table(arg1=c(InputBAMs[i],RIPBAMs[i]))
+      }
+      fwrite(dt.parameter.bai.parallel, file=paste0(tmp.dir,"/parameter.bam.index.parallel.txt"),sep="\t",row.names = F,col.names=F)
+      parallel.bai.cmd <- paste0("parallel -j ", floor(n.cores/4)," --will-cite -a ", paste0(tmp.dir,"/parameter.bam.index.parallel.txt") ," --colsep '\t' '", paste0(bin.dir,"samtools"),
+                                 " index {1} 2>&1 '")
+      system(command = parallel.bai.cmd, wait = T)
 
       #step 1. Run each method to call peaks
       #according to selected Model and FPR cutoff, determine the selected method combo and option
