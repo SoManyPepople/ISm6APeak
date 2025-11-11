@@ -500,7 +500,7 @@ runM6APeakS  <- function(
             dt.m6a.filtered <- dt.m6a.filtered %>% left_join(x=.,y=dt.m6a.filtered.sumwidth  %>% dplyr::distinct(name,SumWidth), by=c("name")) %>%
               dplyr::mutate(SumWidth=case_when(is.na(SumWidth) ~ 0, .default = SumWidth))
             #the overlap gene
-            dt.m6a.filtered.overlapped.gene <- bt.intersect(a=dt.m6a.filtered, b=fread(org.genebed),
+            dt.m6a.filtered.overlapped.gene <- bedtoolsr::bt.intersect(a=dt.m6a.filtered, b=fread(org.genebed),
                                                             s=T, f=0.5, F=0.8, c=T,e = T) %>% as.data.table()
             dt.m6a.filtered <- dt.m6a.filtered %>% left_join(x=.,y=dt.m6a.filtered.overlapped.gene %>% dplyr::select(name=V4,Sample=V7,OverlappedNoGene=V9) %>%
                                                                dplyr::distinct(Sample,name,OverlappedNoGene), by=c("Sample","name"))
@@ -548,13 +548,13 @@ runM6APeakS  <- function(
           dplyr::mutate(SumWidth=case_when(is.na(SumWidth) ~ 0, .default = SumWidth))
         #check the overlapped gene count of merged m6a
         # gene.bed.file <- "/data/m6A_calling_strategy/RIPPeakS_resource/mm39_gencode.gene.bed"
-        dt.m6a.filtered.overlapped.gene <- bt.intersect(a=dt.m6a.filtered, b=fread(org.genebed),s=T, f=0.5, F=0.8, c=T,e = T) %>% as.data.table()
+        dt.m6a.filtered.overlapped.gene <- bedtoolsr::bt.intersect(a=dt.m6a.filtered, b=fread(org.genebed),s=T, f=0.5, F=0.8, c=T,e = T) %>% as.data.table()
         #dt.m6a.filtered.overlapped.gene[,.N,by=.(Sample=V7,nGene=V9)] %>% dplyr::arrange(Sample,nGene)
         #filter out merged peak with more than two genes and exonic width over 3kb
         dt.m6a.notkept <- dt.m6a.filtered.overlapped.gene[V9>2 & V8>3000,]
         #dt.m6a.notkept <- dt.m6a.filtered.overlapped.gene[V9>1,]
         dt.m6a.filtered <- dt.m6a.filtered %>% dplyr::filter(!name %in% dt.m6a.notkept$V4) %>% dplyr::filter(str_detect(seqnames,"chr")) #key filtering
-        dt.m6a.overlapgene <- bt.intersect(a=dt.m6a.filtered, b=fread(org.genebed),s=T, f=0.5, F=0.8, wo=T,e = T) %>% as.data.table()
+        dt.m6a.overlapgene <- bedtoolsr::bt.intersect(a=dt.m6a.filtered, b=fread(org.genebed),s=T, f=0.5, F=0.8, wo=T,e = T) %>% as.data.table()
         #obtain the intersect of GLORI_mESC m6a site
         if(!is.null(org.benchmark.bed)){
           if(file.exists(org.benchmark.bed)){
