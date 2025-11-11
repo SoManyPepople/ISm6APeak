@@ -266,7 +266,6 @@ runM6APeakS  <- function(
                                " index {1} 2>&1 '")
     system(command = parallel.bai.cmd, wait = T)
     #0.4 pull out stranded reads which is reverse to the mRNA
-    #0.4 pull out stranded reads which is reverse to the mRNA
     message(paste0("[",Sys.time(),"] ","step 0.4 pull out stranded reads which is reverse to the mRNA"))
     dt.infer.strandness.res <- foreach(i=1:length(Samples),.combine='rbind')%do%{
       foreach(j=c("Input","RIP"),.combine='rbind')%do%{
