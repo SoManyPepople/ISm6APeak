@@ -260,8 +260,8 @@ runM6APeakS  <- function(
                                             " -s {1} -r {2} -i {3} 1>{4} 2>&1 '")
     system(command = parallel.infer.strandness.cmd, wait = T)
 
-    #0.4 pull out stranded reads which is reverse to the mRNA
-    message(paste0("[",Sys.time(),"] ","step 0.4 pull out stranded reads which is reverse to the mRNA"))
+    #0.3 pull out stranded reads which is reverse to the mRNA
+    message(paste0("[",Sys.time(),"] ","step 0.3 pull out stranded reads which is reverse to the mRNA"))
     dt.infer.strandness.res <- foreach(i=1:length(Samples),.combine='rbind')%do%{
       foreach(j=c("Input","RIP"),.combine='rbind')%do%{
         dt.res <- fread(paste0(tmp.dir,"/",Samples[i],"_", j, "_infer.strandness.tsv"))
@@ -279,7 +279,7 @@ runM6APeakS  <- function(
         }
       }
     }
-
+    print(dt.infer.strandness.res)
     if(length(unique(dt.infer.strandness.res$Strandness))==1 & unique(dt.infer.strandness.res$Strandness)!="unstranded"){
       if(unique(dt.infer.strandness.res$Strandness == "R1")){
         dt.parameter.stranded.bam.parallel <- foreach(i=1:length(Samples),.combine='rbind')%do%{
