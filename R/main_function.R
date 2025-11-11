@@ -176,6 +176,7 @@ PeakIntensity.parallel <- function(n.cores=2,
   return(peak_level_all)
 }
 #function to remove intron for long peak
+#function to remove intron for long peak
 LongPeakRemoveIntron <- function(dt.peak = dt.MeTPeak.m6As %>% dplyr::filter(ComboName=="Combo2" & Sample=="HEK_NEB_mRNA1" & end-start>=5000),
                                  genome_file="~/genome_db/STAR_index/STAR_hg38/chrNameLength.txt",
                                  dt.intron=readRDS("/data/m6A_calling_strategy/Analysis/dt.intron.hg38.RDS")
