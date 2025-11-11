@@ -284,6 +284,7 @@ runM6APeakS  <- function(
         }
       }
     }
+
     if(length(unique(dt.infer.strandness.res$Strandness))==1 & unique(dt.infer.strandness.res$Strandness)!="unstranded"){
       if(unique(dt.infer.strandness.res$Strandness == "R1")){
         dt.parameter.stranded.bam.parallel <- foreach(i=1:length(Samples),.combine='rbind')%do%{
