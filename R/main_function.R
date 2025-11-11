@@ -217,6 +217,10 @@ runM6APeakS  <- function(
     n.cores=40,
     rm.inter=TRUE
 ){
+  #require packages
+  for(p in c("exomePeak", "exomePeak2", "TRESS", "MeTPeak","MeRIPtools","foreach","tidyverse","data.table","bedtoolsr")){
+    suppressMessages(library(p,character.only=T,verbose=F))
+  }
   options(scipen = 9)
   options(bedtools.path = bin.dir)
   if(!dir.exists(out.dir)){dir.create(out.dir,recursive = T)}
