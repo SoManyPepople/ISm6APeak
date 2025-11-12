@@ -266,10 +266,10 @@ runM6APeakS  <- function(
     dt.infer.strandness.res <- foreach(i=1:length(Samples),.combine='rbind')%do%{
       foreach(j=c("Input","RIP"),.combine='rbind')%do%{
         dt.res <- data.table::fread(paste0(tmp.dir,"/",Samples[i],"_", j, "_infer.strandness.tsv"))
-        if(sum(str_detect(.SD$V6,pattern=fixed("2++,2--")))>0){
+        if(sum(str_detect(dt.res$V6,pattern=fixed("2++,2--")))>0){
           Library <- "PE"
-          if(dt.res[str_detect(.SD$V6,fixed("2++,2--")),"V7"]>=0.5){Strandness <- "R2"}else{
-            if(dt.res[str_detect(.SD$V6,fixed("1++,1--")),"V7"]>=0.5){Strandness <- "R1"}else{
+          if(dt.res[str_detect(dt.res$V6,fixed("2++,2--")),"V7"]>=0.5){Strandness <- "R2"}else{
+            if(dt.res[str_detect(dt.res$V6,fixed("1++,1--")),"V7"]>=0.5){Strandness <- "R1"}else{
               Strandness <- "unstranded"
             }
           }
