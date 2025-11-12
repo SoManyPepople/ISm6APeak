@@ -4,6 +4,7 @@ Title: What the Package Does (Title Case)
 Version: 0.1.0
 Imports:
     data.table,
+    GenomicFeatures,
     dplyr
 Author: PengHuang1994
 Maintainer: The package maintainer <yourself@somewhere.net>
