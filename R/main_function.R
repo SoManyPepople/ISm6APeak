@@ -1,6 +1,6 @@
 
 #function to test data.table
-TestDT <- function(dt=data.table(x = 1:3, data = 4:6)){
+TestDT <- function(dt=data.table::data.table(x = 1:3, data = 4:6)){
   dt <- data.table::as.data.table(dt)
   return(dt[dt$x>1,data])
 }
