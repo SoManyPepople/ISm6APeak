@@ -5,6 +5,7 @@ options(stringsAsFactors = F)
 suppressMessages(library(GenomicFeatures))
 detach(package:GenomicFeatures,force=T)
 suppressMessages(library(txdbmaker))
+suppressMessages(library(GenomicFeatures))
 
 
 require(exomePeak)
@@ -32,10 +33,12 @@ RunexomePeak <- function(InputBAM="~/m6A_calling_strategy/6_alignment_star/R2_ba
     suppressMessages(library(GenomicFeatures))
     detach(package:GenomicFeatures,force=T)
     suppressMessages(library(txdbmaker))
-    # suppressMessages(library(AnnotationDbi))
-    # detach(package:AnnotationDbi,force=T)
-    # suppressMessages(library(AnnotationDbi))
-    # suppressMessages(library(exomePeak))
+    suppressMessages(library(GenomicFeatures))
+
+    suppressMessages(library(AnnotationDbi))
+    detach(package:AnnotationDbi,force=T)
+    suppressMessages(library(AnnotationDbi))
+    suppressMessages(library(exomePeak))
     res <- exomePeak::exomepeak(GENE_ANNO_GTF=gtf,
                                 IP_BAM = RIPBAM,
                                 INPUT_BAM = InputBAM,
