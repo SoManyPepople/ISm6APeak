@@ -4,7 +4,7 @@ Title: What the Package Does (Title Case)
 Version: 0.1.0
 Imports:
     data.table,
-    dplyr  # 如果需要
+    dplyr
 Author: PengHuang1994
 Maintainer: PengHuang
 Description: More about what it does (maybe more than one line)
