@@ -6,7 +6,7 @@ TestDT <- function(dt=data.frame(x = 1:3, data = 4:6)){
 }
 #function to test exomePeak
 Test_MeTPeak <- function(m="MeTPeak"){
-  if(m=="exomePeak"){
+  if(m=="MeTPeak"){
     # using the data included in the package
     library(MeTPeak)
 
