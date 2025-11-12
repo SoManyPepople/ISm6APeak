@@ -2,7 +2,10 @@ options(echo=TRUE) # if you want see commands in output file
 args <- commandArgs(trailingOnly = TRUE)
 
 options(stringsAsFactors = F)
-require(txdbmaker)
+suppressMessages(library(GenomicFeatures))
+detach(package:GenomicFeatures,force=T)
+suppressMessages(library(txdbmaker))
+
 
 require(exomePeak)
 require(data.table)
