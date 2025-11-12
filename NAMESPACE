@@ -1,6 +1,6 @@
 exportPattern("^[[:alpha:]]+")
-import(GenomicFeatures)
 import(txdbmaker)
+import(GenomicFeatures)
 import(dplyr)
 import(data.table)
 import(tidyverse)
