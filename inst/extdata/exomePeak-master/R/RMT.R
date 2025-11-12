@@ -307,7 +307,7 @@ RMT <- function(
 
     #
 
-    peaks = makeTxDb(transcripts=transcripts, splicings=splicing,
+    peaks = txdbmaker::makeTxDb(transcripts=transcripts, splicings=splicing,
                              genes=gene)
     tx <- exonsBy(peaks, "tx",use.names=TRUE)
     mcols(tx) <- mcols_info
