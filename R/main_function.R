@@ -1,5 +1,9 @@
-
-#function
+#' RunexomePeak: Process Exome Peak Data
+#'
+#' @description Brief description.
+#' @param ... Arguments.
+#' @return Processed data.
+#' @export
 #function to run exomePeak
 RunexomePeak <- function(InputBAM="~/m6A_calling_strategy/6_alignment_star/R2_bam/mESC_NEB_WT_rep2_Input_STAR.Aligned.out.SortedByCoord.unique.deduplicate.R2.bam",
                          RIPBAM="~/m6A_calling_strategy/6_alignment_star/R2_bam/mESC_NEB_WT_rep2_RIP_STAR.Aligned.out.SortedByCoord.unique.deduplicate.R2.bam",

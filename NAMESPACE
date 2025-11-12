@@ -1,6 +1,6 @@
 exportPattern("^[[:alpha:]]+")
+export(RunexomePeak)
 import(txdbmaker)
 import(dplyr)
 import(data.table)
 import(tidyverse)
-export(RunexomePeak)
