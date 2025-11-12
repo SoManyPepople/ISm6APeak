@@ -2,7 +2,8 @@ options(echo=TRUE) # if you want see commands in output file
 args <- commandArgs(trailingOnly = TRUE)
 
 options(stringsAsFactors = F)
-require(mysterypackage)
+require(txdbmaker)
+
 require(MeTPeak)
 require(data.table)
 require(tidyverse)

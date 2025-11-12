@@ -2,8 +2,9 @@ options(echo=TRUE) # if you want see commands in output file
 args <- commandArgs(trailingOnly = TRUE)
 
 options(stringsAsFactors = F)
-suppressMessages(require(TRESS))
+require(txdbmaker)
 
+suppressMessages(require(TRESS))
 require(data.table)
 require(tidyverse)
 require(foreach)

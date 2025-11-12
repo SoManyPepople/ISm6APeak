@@ -2,6 +2,8 @@ options(echo=TRUE) # if you want see commands in output file
 args <- commandArgs(trailingOnly = TRUE)
 
 options(stringsAsFactors = F)
+require(txdbmaker)
+
 require(data.table)
 require(tidyverse)
 require(foreach)
