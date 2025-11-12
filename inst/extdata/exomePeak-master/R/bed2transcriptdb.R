@@ -4,7 +4,7 @@
 # read bed file
 # a = read.table(filepath,sep="\t",header=FALSE,stringsAsFactors =FALSE)
   op <- options(warn = (-1))
-  
+
 a = content
 # get transcripts
 no_tx = length(a[,1])
@@ -23,23 +23,23 @@ for (i in 1:no_tx) {
   tx = a[i,]
   tx_id = i
   exon_rank=1:as.integer(tx[10])
-  
+
   # get start
   temp = as.integer(strsplit(as.character(tx[12][1,1]), ",")[[1]]) + tx_start[i]
   exon_start=temp
-  
+
   # get end
   temp = as.integer(strsplit(as.character(tx[11][1,1]), ",")[[1]])
   temp2 = temp + exon_start - 1
   exon_end=temp2
-  
+
   # get CDS
   cds_start = exon_start
   cds_end = exon_end
-  
+
   # get data frame
   splicing_tx = data.frame(tx_id,exon_rank,exon_start,exon_end,cds_start,cds_end)
-  
+
   # collect result
   splicing = rbind(splicing, splicing_tx)
 }
@@ -50,13 +50,13 @@ gene_id = as.character(a[,4])
 gene_id[is.na(gene_id)]="NA"
 gene=data.frame(tx_name,gene_id)
 
-# 
+#
 
-peaks = makeTxDb(transcripts=transcripts, splicings=splicing,
+peaks = txdbmaker::makeTxDb(transcripts=transcripts, splicings=splicing,
                  genes=gene)
 peaks= exonsBy(peaks, by="tx")
 return(peaks)
-  
+
   options(op)
 }
 
