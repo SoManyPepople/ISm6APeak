@@ -40,6 +40,20 @@ install_mystery_packages <- function(pkgs = c("exomePeak", "exomePeak2", "TRESS"
     installed_before <- rownames(utils::installed.packages())
     need_install <- setdiff(pkgs, installed_before)
   }
+  #install exomePeak from source
+  if (length(need_install) > 0 ) {
+    if(length(grep(need_install, pattern="exomePeak"))>0){
+      file_path <- system.file("extdata", "exomePeak-master", package = "mysterypackage")
+      if(file_path != ""){
+        install.packages(file_path,repos=NULL,type="source")
+      }else{
+        message("Required source package for exomePeak is not found")
+      }
+    }
+    #install remaining packages
+    installed_before <- rownames(utils::installed.packages())
+    need_install <- setdiff(pkgs, installed_before)
+  }
   # #install GenomicFeatures<1.61 from source
   # if (length(need_install) > 0 ) {
   #   if(length(grep(need_install, pattern="GenomicFeatures"))>0){
