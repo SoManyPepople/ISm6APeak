@@ -28,10 +28,10 @@ RunexomePeak <- function(InputBAM="~/m6A_calling_strategy/6_alignment_star/R2_ba
 ){
   if(!dir.exists(outdir)){dir.create(outdir,recursive = T)}
   if(!file.exists(paste0(outdir,"/",prefix,"/peak.xls"))){
-    suppressMessages(library(AnnotationDbi))
-    detach(package:AnnotationDbi,force=T)
-    suppressMessages(library(AnnotationDbi))
-    suppressMessages(library(exomePeak))
+    # suppressMessages(library(AnnotationDbi))
+    # detach(package:AnnotationDbi,force=T)
+    # suppressMessages(library(AnnotationDbi))
+    # suppressMessages(library(exomePeak))
     res <- exomePeak::exomepeak(GENE_ANNO_GTF=gtf,
                                 IP_BAM = RIPBAM,
                                 INPUT_BAM = InputBAM,
