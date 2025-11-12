@@ -1,4 +1,8 @@
 
+#function to test data.table
+TestDT <- function(dt=data.table(x = 1:3, data = 4:6)){
+  return(dt[x>1,])
+}
 
 #function to load m6As from each method
 LoadPeakMethod <- function(Method=c("MACS2","MeRIPtools", "MeTPeak", "TRESS", "exomePeak2", "exomePeak")[5],
