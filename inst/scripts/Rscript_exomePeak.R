@@ -2,7 +2,8 @@ options(echo=TRUE) # if you want see commands in output file
 args <- commandArgs(trailingOnly = TRUE)
 
 options(stringsAsFactors = F)
-require(mysterypackage)
+library(mysterypackage)
+getNamespaceExports("mysterypackage")
 suppressMessages(library(GenomicFeatures))
 detach(package:GenomicFeatures,force=T)
 suppressMessages(library(txdbmaker))
