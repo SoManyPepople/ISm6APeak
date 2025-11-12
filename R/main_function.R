@@ -4,6 +4,42 @@ TestDT <- function(dt=data.frame(x = 1:3, data = 4:6)){
   dt <- data.table::as.data.table(dt)
   return(dt[x>1,data])
 }
+#function to test exomePeak
+Test_MeTPeak <- function(m="MeTPeak"){
+  if(m=="exomePeak"){
+    # using the data included in the package
+    library(MeTPeak)
+
+    # in the real case, change the gtf to what you need
+    gtf <- system.file('extdata','example.gtf',package='MeTPeak')
+
+    ip1 <- system.file('extdata','IP1.bam',package='MeTPeak')
+    ip2 <- system.file('extdata','IP2.bam',package='MeTPeak')
+    ip3 <- system.file('extdata','IP3.bam',package='MeTPeak')
+    input1 <- system.file('extdata','Input1.bam',package='MeTPeak')
+    input2 <- system.file('extdata','Input2.bam',package='MeTPeak')
+    input3 <- system.file('extdata','Input3.bam',package='MeTPeak')
+
+    IP_BAM <- c(ip1,ip2,ip3)
+    INPUT_BAM <- c(input1,input2,input3)
+
+    metpeak(GENE_ANNO_GTF=gtf,IP_BAM = IP_BAM,INPUT_BAM = INPUT_BAM,
+            EXPERIMENT_NAME="example")
+  }else{
+    library("exomePeak")
+    gtf <- system.file("extdata", "example.gtf", package="exomePeak")
+    f1 <- system.file("extdata", "IP1.bam", package="exomePeak")
+    f2 <- system.file("extdata", "IP2.bam", package="exomePeak")
+    f3 <- system.file("extdata", "IP3.bam", package="exomePeak")
+    f4 <- system.file("extdata", "IP4.bam", package="exomePeak")
+    f5 <- system.file("extdata", "Input1.bam", package="exomePeak")
+    f6 <- system.file("extdata", "Input2.bam", package="exomePeak")
+    f7 <- system.file("extdata", "Input3.bam", package="exomePeak")
+    result <- exomepeak(GENE_ANNO_GTF=gtf,
+                        IP_BAM=c(f1,f2,f3,f4),
+                        INPUT_BAM=c(f5,f6,f7))
+  }
+}
 
 #function to load m6As from each method
 LoadPeakMethod <- function(Method=c("MACS2","MeRIPtools", "MeTPeak", "TRESS", "exomePeak2", "exomePeak")[5],
