@@ -5,7 +5,8 @@ Version: 0.1.0
 Imports:
     GenomicFeatures,
     dplyr,
-    data.table
+    data.table,
+    tidyverse
 Author: PengHuang1994
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)

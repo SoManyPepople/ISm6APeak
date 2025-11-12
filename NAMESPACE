@@ -1,5 +1,5 @@
 exportPattern("^[[:alpha:]]+")
+import(GenomicFeatures)
+import(dplyr)
 import(data.table)
 import(tidyverse)
-importFrom(GenomicFeatures, select)
-importFrom(dplyr, filter)  # Avoid importing conflicting select
