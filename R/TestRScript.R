@@ -1,0 +1,2 @@
+library(mysterypackage)
+getNamespaceExports("mysterypackage")
