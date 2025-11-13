@@ -1,5 +1,5 @@
 exportPattern("^[[:alpha:]]+")
-export(RunM6APeakS)
+export(runM6APeakS)
 import(txdbmaker)
 import(dplyr)
 import(data.table)
