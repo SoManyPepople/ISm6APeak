@@ -54,20 +54,20 @@ install_mystery_packages <- function(pkgs = c("exomePeak", "exomePeak2", "TRESS"
     installed_before <- rownames(utils::installed.packages())
     need_install <- setdiff(pkgs, installed_before)
   }
-  # #install GenomicFeatures<1.61 from source
-  # if (length(need_install) > 0 ) {
-  #   if(length(grep(need_install, pattern="GenomicFeatures"))>0){
-  #     file_path <- system.file("extdata", "GenomicFeatures_1.56.0.tar.gz", package = "mysterypackage")
-  #     if(file_path != ""){
-  #       install.packages(file_path,repos=NULL,type="source")
-  #     }else{
-  #       message("Required source package for GenomicFeatures_1.56 is not found")
-  #     }
-  #   }
-  #   #install remaining packages
-  #   installed_before <- rownames(utils::installed.packages())
-  #   need_install <- setdiff(pkgs, installed_before)
-  # }
+  #install GenomicFeatures<1.61 from source
+  if (length(need_install) > 0 ) {
+    if(length(grep(need_install, pattern="GenomicFeatures"))>0){
+      file_path <- system.file("extdata", "GenomicFeatures_1.56.0.tar.gz", package = "mysterypackage")
+      if(file_path != ""){
+        install.packages(file_path,repos=NULL,type="source")
+      }else{
+        message("Required source package for GenomicFeatures_1.56 is not found")
+      }
+    }
+    #install remaining packages
+    installed_before <- rownames(utils::installed.packages())
+    need_install <- setdiff(pkgs, installed_before)
+  }
   # Ensure BiocManager is available for Bioconductor packages and general robust install
   if (!requireNamespace("BiocManager", quietly = TRUE)) {
     message("Installing BiocManager from CRAN...")
