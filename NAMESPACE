@@ -1,5 +1,5 @@
 exportPattern("^[[:alpha:]]+")
-export(RunexomePeak)
+export(RunM6APeakS)
 import(txdbmaker)
 import(dplyr)
 import(data.table)
