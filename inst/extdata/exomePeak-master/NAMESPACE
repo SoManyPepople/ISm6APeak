@@ -5,5 +5,7 @@ export(exomepeak)
 export(bltest)
 export(RMT)
 import(txdbmaker)
+importFrom(txdbmaker, makeTxDbFromGFF)
 import(Rsamtools)
 import(GenomicAlignments)
+

@@ -13,6 +13,8 @@ Depends: Rsamtools, GenomicFeatures (>= 1.14.5), rtracklayer,
 Suggests: 
     knitr,
     rmarkdown
+Imports:
+    txdbmaker
 biocViews: Sequencing, MethylSeq, RNASeq
 NeedsCompilation: no
 VignetteBuilder: knitr
