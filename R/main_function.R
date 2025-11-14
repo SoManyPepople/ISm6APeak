@@ -160,7 +160,7 @@ PeakIntensity.parallel <- function(n.cores=2,
       data.table(a=peakbeds[i], b=RIPBAM[i], o=paste0(out.tmp,"/",Samples[i], "_RIP_coverage.txt"))
     }
     fwrite(dt.parameter.RIP, file=paste0(out.tmp,"/RIP_parallel_bedtools_parameter_table.txt"),sep="\t",row.names = F,col.names=F)
-    parallel_cmd.RIP <- paste0("parallel -j ", n.cores," --will-cite -a ", out.tmp, "/RIP_parallel_bedtools_parameter_table.txt --colsep '\t' '",
+    parallel_cmd.RIP <- paste0("parallel --workdir ",  out.tmp, " -j ", n.cores," --will-cite -a ", out.tmp, "/RIP_parallel_bedtools_parameter_table.txt --colsep '\t' '",
                                bedtools_path,"/bedtools coverage  -g ", genome_file, bt_coverage.options, " -a {1} -b {2} 1>{3} 2>/dev/null '")
     system(command = parallel_cmd.RIP, wait = T)
     #determine the accomplishment of the bedtools coverage
@@ -194,7 +194,7 @@ PeakIntensity.parallel <- function(n.cores=2,
     }
   }
   fwrite(dt.parameter.InputRIP, file=paste0(out.tmp,"/InputRIP_parallel_bedtools_parameter_table.txt"),sep="\t",row.names = F,col.names=F)
-  parallel_cmd.InputRIP <- paste0("parallel -j ", n.cores," --will-cite -a ", out.tmp, "/InputRIP_parallel_bedtools_parameter_table.txt --colsep '\t' '",
+  parallel_cmd.InputRIP <- paste0("parallel --workdir ",  out.tmp, " -j ", n.cores," --will-cite -a ", out.tmp, "/InputRIP_parallel_bedtools_parameter_table.txt --colsep '\t' '",
                                   bedtools_path,"/bedtools coverage -g ", genome_file, bt_coverage.options, " -a {1} -b {2} 1>{3} 2>/dev/null '")
   system(command = parallel_cmd.InputRIP, wait = T)
 
@@ -298,7 +298,7 @@ runM6APeakS  <- function(
       )
     }
     fwrite(dt.parameter.infer.strandness.parallel, file=paste0(tmp.dir,"/parameter.infer.strandness.parallel.txt"),sep="\t",row.names = F,col.names=F)
-    parallel.infer.strandness.cmd <- paste0("parallel -j ", floor(n.cores/4)," --will-cite -a ", paste0(tmp.dir,"/parameter.infer.strandness.parallel.txt") ," --colsep '\t' '", paste0(bin.dir,"infer_experiment.py"),
+    parallel.infer.strandness.cmd <- paste0(bin.dir,"/parallel --workdir ",  outdir, " -j ", floor(n.cores/4)," --will-cite -a ", paste0(tmp.dir,"/parameter.infer.strandness.parallel.txt") ," --colsep '\t' '", paste0(bin.dir,"infer_experiment.py"),
                                             " -s {1} -r {2} -i {3} 1>{4} 2>&1 '")
     system(command = parallel.infer.strandness.cmd, wait = T)
 
@@ -347,7 +347,7 @@ runM6APeakS  <- function(
         message(paste0("Error! failed to pull out stranded reads from PE BAMs"))
       }
       fwrite(dt.parameter.stranded.bam.parallel, file=paste0(tmp.dir,"/parameter.stranded.bam.parallel.txt"),sep="\t",row.names = F,col.names=F)
-      parallel.stranded.bam.cmd <- paste0("parallel -j ", floor(n.cores/5)," --will-cite -a ", paste0(tmp.dir,"/parameter.stranded.bam.parallel.txt") ," --colsep '\t' '", paste0(bin.dir,"samtools"),
+      parallel.stranded.bam.cmd <- paste0(bin.dir,"/parallel --workdir ",  outdir, " -j ", floor(n.cores/5)," --will-cite -a ", paste0(tmp.dir,"/parameter.stranded.bam.parallel.txt") ," --colsep '\t' '", paste0(bin.dir,"samtools"),
                                           " view --threads {1} -b -h {2} {3} {4} -o {5} >{6} 2>&1 '")
       system(command = parallel.stranded.bam.cmd, wait = T)
 
@@ -374,7 +374,7 @@ runM6APeakS  <- function(
         data.table(arg1=c(InputBAMs[i],RIPBAMs[i]))
       }
       fwrite(dt.parameter.bai.parallel, file=paste0(tmp.dir,"/parameter.bam.index.parallel.txt"),sep="\t",row.names = F,col.names=F)
-      parallel.bai.cmd <- paste0("parallel -j ", floor(n.cores/4)," --will-cite -a ", paste0(tmp.dir,"/parameter.bam.index.parallel.txt") ," --colsep '\t' '", paste0(bin.dir,"samtools"),
+      parallel.bai.cmd <- paste0(bin.dir,"/parallel --workdir ",  outdir, " -j ", floor(n.cores/4)," --will-cite -a ", paste0(tmp.dir,"/parameter.bam.index.parallel.txt") ," --colsep '\t' '", paste0(bin.dir,"samtools"),
                                  " index {1} 2>&1 '")
       system(command = parallel.bai.cmd, wait = T)
 
@@ -416,7 +416,7 @@ runM6APeakS  <- function(
         }
         message(paste0("[",Sys.time(),"] ","step 1.0 call peaks use non-exomePeak2 methods: MACS2, MeTPeak, MeRIPtools, exomePeak, exomePeak2, and TRESS"))
         fwrite(dt.parameter.nonexomePeak2.parallel, file=paste0(tmp.dir,"/parameter.Method.except.exomePeak2.parallel.txt"),sep="\t",row.names = F,col.names=F)
-        parallel.Method.except.exomePeak2.cmd <- paste0(bin.dir,"/parallel -j ", n.cores," --will-cite -a ", paste0(tmp.dir,"/parameter.Method.except.exomePeak2.parallel.txt") ," --colsep '\t' '",
+        parallel.Method.except.exomePeak2.cmd <- paste0(bin.dir,"/parallel --workdir ",  outdir, " -j ", n.cores," --will-cite -a ", paste0(tmp.dir,"/parameter.Method.except.exomePeak2.parallel.txt") ," --colsep '\t' '",
                                                         paste0(bin.dir,"/Rscript "), paste0(script.dir,"/Rscript_"), "{1}.R {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} 1>{14}  2>&1 '")
         system(command = parallel.Method.except.exomePeak2.cmd,wait = T)
       }
@@ -444,7 +444,7 @@ runM6APeakS  <- function(
           }
         }
         fwrite(dt.parameter.exomePeak2.parallel, file=paste0(tmp.dir,"/parameter.Method.exomePeak2.parallel.txt"),sep="\t",row.names = F,col.names=F)
-        parallel.Method.exomePeak2.cmd <- paste0("parallel -j ", min(max(floor(n.cores/(quantile(c(dt.stranded.BAM.Depth$Input,dt.stranded.BAM.Depth$RIP),0.75)/30)/8),1),10)," --will-cite -a ", paste0(tmp.dir,"/parameter.Method.exomePeak2.parallel.txt") ," --colsep '\t' '", paste0(bin.dir,"/Rscript "),
+        parallel.Method.exomePeak2.cmd <- paste0(bin.dir,"/parallel --workdir ",  outdir, " -j ", min(max(floor(n.cores/(quantile(c(dt.stranded.BAM.Depth$Input,dt.stranded.BAM.Depth$RIP),0.75)/30)/8),1),10)," --will-cite -a ", paste0(tmp.dir,"/parameter.Method.exomePeak2.parallel.txt") ," --colsep '\t' '", paste0(bin.dir,"/Rscript "),
                                                  paste0(script.dir,"/Rscript_"), "{1}.R {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} 1>{14}  2>&1 '")
         message(paste0("step 1.1 call peaks use exomePeak2 method"))
         system(command = parallel.Method.exomePeak2.cmd,wait = T)
@@ -488,7 +488,7 @@ runM6APeakS  <- function(
       }
       fwrite(dt.parameter.bedtools.parallel, file=paste0(tmp.dir,"/parameter.Method.bedtools.parallel.txt"),sep="\t",row.names = F,col.names=F)
       intensity.nthread <- max(floor(n.cores/(quantile(c(dt.stranded.BAM.Depth$Input,dt.stranded.BAM.Depth$RIP),0.75)/30)/8),1)
-      parallel.Method.bedtools.cmd <- paste0("parallel -j ", min(intensity.nthread,10)," --will-cite -a ", paste0(tmp.dir,"/parameter.Method.bedtools.parallel.txt") ," --colsep '\t' '", paste0(bin.dir,"/Rscript "),
+      parallel.Method.bedtools.cmd <- paste0(bin.dir,"/parallel --workdir ",  outdir, " -j ", min(intensity.nthread,10)," --will-cite -a ", paste0(tmp.dir,"/parameter.Method.bedtools.parallel.txt") ," --colsep '\t' '", paste0(bin.dir,"/Rscript "),
                                              paste0(script.dir,"/Rscript_bedtools_intensity.R")," {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14} {15} 1>{16}  2>&1 '")
       system(command = parallel.Method.bedtools.cmd, wait = T)
 
