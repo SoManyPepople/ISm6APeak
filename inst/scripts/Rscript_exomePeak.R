@@ -2,6 +2,8 @@ options(echo=TRUE) # if you want see commands in output file
 
 args <- commandArgs(trailingOnly = TRUE)
 cat("CWD:", getwd(), "\n")
+cat("R version:", R.version.string, "\n")
+cat("Library path:", .libPaths(), "\n")
 
 options(stringsAsFactors = F)
 library(mysterypackage)
