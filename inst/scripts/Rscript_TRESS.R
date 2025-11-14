@@ -1,6 +1,8 @@
 options(echo=TRUE) # if you want see commands in output file
 args <- commandArgs(trailingOnly = TRUE)
 
+cat("R version:", R.version.string, "\n")
+cat("Library path:", .libPaths(), "\n")
 options(stringsAsFactors = F)
 require(txdbmaker)
 

@@ -1,2 +1,0 @@
-library(mysterypackage)
-getNamespaceExports("mysterypackage")
