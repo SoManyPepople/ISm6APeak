@@ -416,7 +416,8 @@ runM6APeakS  <- function(
         }
         message(paste0("[",Sys.time(),"] ","step 1.0 call peaks use non-exomePeak2 methods: MACS2, MeTPeak, MeRIPtools, exomePeak, exomePeak2, and TRESS"))
         fwrite(dt.parameter.nonexomePeak2.parallel, file=paste0(tmp.dir,"/parameter.Method.except.exomePeak2.parallel.txt"),sep="\t",row.names = F,col.names=F)
-        parallel.Method.except.exomePeak2.cmd <- paste0("parallel -j ", n.cores," --will-cite -a ", paste0(tmp.dir,"/parameter.Method.except.exomePeak2.parallel.txt") ," --colsep '\t' '", paste0(bin.dir,"/Rscript "),
+        parallel.Method.except.exomePeak2.cmd <- paste0("parallel -j ", n.cores," --will-cite -a ", paste0(tmp.dir,"/parameter.Method.except.exomePeak2.parallel.txt") ," --colsep '\t' '",
+                                                        paste0("source ~/.bashrc && conda activate MyPackage2 && ",bin.dir,"/Rscript "),
                                                         paste0(script.dir,"/Rscript_"), "{1}.R {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} 1>{14}  2>&1 '")
         system(command = parallel.Method.except.exomePeak2.cmd,wait = T)
       }
