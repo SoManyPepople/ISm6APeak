@@ -147,8 +147,8 @@ PeakIntensity.parallel <- function(n.cores=2,
   peakbeds <- peakbeds[match(Samples,names.peakbeds)]
   InputBAM <- InputBAM[match(Samples,names.Input)]
   RIPBAM <- RIPBAM[match(Samples,names.RIP)]
-  Input.Depth <- Depth[match(paste0(Samples,"_Input"), Depth$names.Depth)]
-  RIP.Depth <- Depth[match(paste0(Samples,"_RIP"), Depth$names.Depth)]
+  Input.Depth <- Depth[match(paste0(Samples,"_Input"), names.Depth)]
+  RIP.Depth <- Depth[match(paste0(Samples,"_RIP"), names.Depth)]
   #determine bt_coverage.options
   if(strandness != "unstranded"){ bt_coverage.options <- paste0(bt_coverage.options, "-", strandness, " ")}
   #sort input bed files
