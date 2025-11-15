@@ -144,9 +144,9 @@ PeakIntensity.parallel <- function(n.cores=2,
   Samples <- Reduce(intersect, list(names.peakbeds, names.Input, names.RIP,
                                     gsub(names.Depth,pattern="_Input",replacement=""), gsub(names.Depth,pattern="_RIP",replacement="")))
   n.cores <- min(c(n.cores, length(Samples)*2))
-  peakbeds <- peakbeds[match(Samples,peakbeds$names.peakbeds)]
-  InputBAM <- InputBAM[match(Samples,InputBAM$names.Input)]
-  RIPBAM <- RIPBAM[match(Samples,RIPBAM$names.RIP)]
+  peakbeds <- peakbeds[match(Samples,names.peakbeds)]
+  InputBAM <- InputBAM[match(Samples,names.Input)]
+  RIPBAM <- RIPBAM[match(Samples,names.RIP)]
   Input.Depth <- Depth[match(paste0(Samples,"_Input"), Depth$names.Depth)]
   RIP.Depth <- Depth[match(paste0(Samples,"_RIP"), Depth$names.Depth)]
   #determine bt_coverage.options
@@ -309,8 +309,8 @@ runM6APeakS  <- function(
         dt.res <- data.table::fread(paste0(tmp.dir,"/",Samples[i],"_", j, "_infer.strandness.tsv"))
         if(sum(str_detect(dt.res$V6,pattern=fixed("2++,2--")))>0){
           Library <- "PE"
-          if(dt.res[str_detect(dt.res$V6,fixed("2++,2--")),"V7"]>=0.5){Strandness <- "R2"}else{
-            if(dt.res[str_detect(dt.res$V6,fixed("1++,1--")),"V7"]>=0.5){Strandness <- "R1"}else{
+          if(dt.res[str_detect(V6,fixed("2++,2--")),V7]>=0.5){Strandness <- "R2"}else{
+            if(dt.res[str_detect(V6,fixed("1++,1--")),V7]>=0.5){Strandness <- "R1"}else{
               Strandness <- "unstranded"
             }
           }
@@ -392,11 +392,12 @@ runM6APeakS  <- function(
         }
       if(nrow(dt.method.combo.selected)<=0){message(paste0("Error! Please choose appropriate model and FPR cutoff! "))}
       print(dt.method.combo.selected)
+
       #1.1 run non-exomePeak2 method combo
       dt.method.combo.selected.nonexomepeak2 <- dt.method.combo.selected %>% dplyr::filter(Method != "exomePeak2")
       if(nrow(dt.method.combo.selected.nonexomepeak2)>0){
         dt.parameter.nonexomePeak2.parallel <- foreach(M=unique(dt.method.combo.selected.nonexomepeak2$Method),.combine = 'rbind')%do%{
-          foreach(combo = unique(dt.method.combo.selected.nonexomepeak2[dt.method.combo.selected.nonexomepeak2$Method==M,"ComboName"]), .combine='rbind')%do%{
+          foreach(combo = unique(dt.method.combo.selected.nonexomepeak2[Method==M,ComboName]), .combine='rbind')%do%{
             data.table(Method=M,
                        bin_path=rep(bin.dir,length(Samples)),
                        InputBAM=InputBAMs,
@@ -424,7 +425,7 @@ runM6APeakS  <- function(
       dt.method.combo.selected.exomepeak2 <- dt.method.combo.selected %>% dplyr::filter(Method == "exomePeak2")
       if(nrow(dt.method.combo.selected.exomepeak2)>0){
         dt.parameter.exomePeak2.parallel <- foreach(M=unique(dt.method.combo.selected.exomepeak2$Method),.combine = 'rbind')%do%{
-          foreach(combo = unique(dt.method.combo.selected.exomepeak2[dt.method.combo.selected.exomepeak2$Method==M,"ComboName"]), .combine='rbind')%do%{
+          foreach(combo = unique(dt.method.combo.selected.exomepeak2[Method==M,ComboName]), .combine='rbind')%do%{
             data.table(Method=M,
                        bin_path=rep(bin.dir,length(Samples)),
                        InputBAM=InputBAMs,
@@ -452,7 +453,7 @@ runM6APeakS  <- function(
 
       #load and save m6As
       dt.Method.m6a <- foreach(M = unique(dt.method.combo.selected$Method),.combine='rbind')%do%{
-        foreach(combo = unique(dt.method.combo.selected[dt.method.combo.selected$Method==M,"ComboName"]), .combine='rbind')%do%{
+        foreach(combo = unique(dt.method.combo.selected[Method==M,ComboName]), .combine='rbind')%do%{
           LoadPeakMethod(Method=M, Method.peak.dir = paste0(out.dir,"/", M, "/",M,"_", combo)) %>% mutate(Method=M, ComboName=combo) %>%
             dplyr::filter(Sample %in% Samples)
         }
@@ -505,7 +506,7 @@ runM6APeakS  <- function(
           dt.intensity <- dt.intensity %>% dplyr::select(name,Sample,pos,neg)
           #pull out m6a with intensity higher than cutoff at FPR20
           #filtered and un overlapped  m6a at pos strand
-          dt.m6a.filtered.pos <- dt.intensity %>% dplyr::filter(pos >= dt.method.combo.selected[dt.method.combo.selected$Method==M & dt.method.combo.selected$ComboName==combo,cutoff])
+          dt.m6a.filtered.pos <- dt.intensity %>% dplyr::filter(pos >= dt.method.combo.selected[Method==M & ComboName==combo,cutoff])
           if(nrow(dt.m6a.filtered.pos)>0){
             dt.m6a.filtered.pos <- dt.m6a.filtered.pos %>% dplyr::mutate(name = name %>% strsplit(split=paste0(M,"_"),fixed=T) %>% sapply(tail,1)) %>%
               dplyr::mutate(seqnames=name %>% strsplit(split="_",fixed=T) %>% sapply("[",1),
@@ -523,7 +524,7 @@ runM6APeakS  <- function(
             dt.m6a.filtered.pos.merged <- data.table(seqnames=NULL,start=NULL,end=NULL,name=NULL,score=NULL,strand=NULL,Sample=NULL)
           }
           #filtered  and un overlapped m6a at neg strand
-          dt.m6a.filtered.neg <- dt.intensity %>% dplyr::filter(neg >= dt.method.combo.selected[dt.method.combo.selected$Method==M & dt.method.combo.selected$ComboName==combo,cutoff])
+          dt.m6a.filtered.neg <- dt.intensity %>% dplyr::filter(neg >= dt.method.combo.selected[Method==M & ComboName==combo,cutoff])
           if(nrow(dt.m6a.filtered.neg)>0){
             dt.m6a.filtered.neg <- dt.m6a.filtered.neg %>% dplyr::mutate(name = name %>% strsplit(split=paste0(M,"_"),fixed=T) %>% sapply(tail,1)) %>%
               dplyr::mutate(seqnames=name %>% strsplit(split="_",fixed=T) %>% sapply("[",1),
@@ -553,7 +554,7 @@ runM6APeakS  <- function(
                                                             s=T, f=0.5, F=0.8, c=T,e = T) %>% as.data.table()
             dt.m6a.filtered <- dt.m6a.filtered %>% left_join(x=.,y=dt.m6a.filtered.overlapped.gene %>% dplyr::select(name=V4,Sample=V7,OverlappedNoGene=V9) %>%
                                                                dplyr::distinct(Sample,name,OverlappedNoGene), by=c("Sample","name"))
-            dt.m6a.filtered %>% mutate(Method=M, ComboName=combo, optionID=dt.method.combo.selected[dt.method.combo.selected$Method==M & dt.method.combo.selected$ComboName==combo,"optionID"])
+            dt.m6a.filtered %>% mutate(Method=M, ComboName=combo, optionID=dt.method.combo.selected[Method==M & ComboName==combo,optionID])
           }
         }
       }
