@@ -393,11 +393,11 @@ runM6APeakS  <- function(
       if(nrow(dt.method.combo.selected)<=0){message(paste0("Error! Please choose appropriate model and FPR cutoff! "))}
       print(dt.method.combo.selected)
 
-      #1.1 run non-exomePeak2 method combo
-      dt.method.combo.selected.nonexomepeak2 <- dt.method.combo.selected %>% dplyr::filter(Method != "exomePeak2")
-      if(nrow(dt.method.combo.selected.nonexomepeak2)>0){
-        dt.parameter.nonexomePeak2.parallel <- foreach(M=unique(dt.method.combo.selected.nonexomepeak2$Method),.combine = 'rbind')%do%{
-          foreach(combo = unique(dt.method.combo.selected.nonexomepeak2[Method==M,ComboName]), .combine='rbind')%do%{
+      #1.1 run MACS2, TRESS, exomePeak, MeTPeak method combo
+      dt.method.combo.selected.fourmethod <- dt.method.combo.selected %>% dplyr::filter(Method %in% c("exomePeak2","MeRIPtools"))
+      if(nrow(dt.method.combo.selected.fourmethod)>0){
+        dt.parameter.fourmethod.parallel <- foreach(M=unique(dt.method.combo.selected.fourmethod$Method),.combine = 'rbind')%do%{
+          foreach(combo = unique(dt.method.combo.selected.fourmethod[Method==M,ComboName]), .combine='rbind')%do%{
             data.table(Method=M,
                        bin_path=rep(bin.dir,length(Samples)),
                        InputBAM=InputBAMs,
@@ -410,18 +410,49 @@ runM6APeakS  <- function(
                        Annot.sqlite=rep(org.sqlite_file, length(Samples)),
                        Annot.genome=rep(org.genome_file, length(Samples)),
                        Strandness=rep("S", length(Samples)),
-                       nthread=2,#thread for MeRIPtools and exomePeak2 method and ignore for other method
+                       nthread=1,#thread for MeRIPtools and exomePeak2 method and ignore for other method
                        Logfile=paste0(log.dir,"/", M, "_",combo,"_", Samples,".log")
             )
           }
         }
-        message(paste0("[",Sys.time(),"] ","step 1.0 call peaks use non-exomePeak2 methods: MACS2, MeTPeak, MeRIPtools, exomePeak, exomePeak2, and TRESS"))
-        fwrite(dt.parameter.nonexomePeak2.parallel, file=paste0(tmp.dir,"/parameter.Method.except.exomePeak2.parallel.txt"),sep="\t",row.names = F,col.names=F)
-        parallel.Method.except.exomePeak2.cmd <- paste0(bin.dir,"/parallel --workdir ",  out.dir, " -j ", n.cores," --will-cite -a ", paste0(tmp.dir,"/parameter.Method.except.exomePeak2.parallel.txt") ," --colsep '\t' '",
+        message(paste0("[",Sys.time(),"] ","step 1.1 call peaks use : MACS2, MeTPeak,  exomePeak, and TRESS"))
+        fwrite(dt.parameter.fourmethod.parallel, file=paste0(tmp.dir,"/parameter.Method.fourmethod.parallel.txt"),sep="\t",row.names = F,col.names=F)
+        parallel.Method.fourmethod.cmd <- paste0(bin.dir,"/parallel --workdir ",  out.dir, " -j ", n.cores," --will-cite -a ", paste0(tmp.dir,"/parameter.Method.fourmethod.parallel.txt") ," --colsep '\t' '",
                                                         paste0(bin.dir,"/Rscript "), paste0(script.dir,"/Rscript_"), "{1}.R {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} 1>{14}  2>&1 '")
-        system(command = parallel.Method.except.exomePeak2.cmd,wait = T)
+        system(command = parallel.Method.fourmethod.cmd,wait = T)
       }
 
+      #1.2 run MeRIPtools method combo
+      dt.method.combo.selected.MeRIPtools <- dt.method.combo.selected %>% dplyr::filter(Method %in% c("exomePeak2","MeRIPtools"))
+      if(nrow(dt.method.combo.selected.MeRIPtools)>0){
+        dt.parameter.MeRIPtools.parallel <- foreach(M=unique(dt.method.combo.selected.MeRIPtools$Method),.combine = 'rbind')%do%{
+          foreach(combo = unique(dt.method.combo.selected.MeRIPtools[Method==M,ComboName]), .combine='rbind')%do%{
+            available.threads <- n.cores/length(unique(dt.method.combo.selected.MeRIPtools[Method==M,ComboName]))/(length(Samples)*2*2) %>% floor()
+            data.table(Method=M,
+                       bin_path=rep(bin.dir,length(Samples)),
+                       InputBAM=InputBAMs,
+                       RIPBAM=RIPBAMs,
+                       out.dir=rep(paste0(out.dir,"/", M),length(Samples)),
+                       prefix=Samples,
+                       SelectedCombo=rep(combo,length(Samples)),
+                       Organism=rep(Organism, length(Samples)),
+                       Annot.gtf=rep(org.gtf_file, length(Samples)),
+                       Annot.sqlite=rep(org.sqlite_file, length(Samples)),
+                       Annot.genome=rep(org.genome_file, length(Samples)),
+                       Strandness=rep("S", length(Samples)),
+                       nthread=available.threads,#thread for MeRIPtools and exomePeak2 method and ignore for other method
+                       Logfile=paste0(log.dir,"/", M, "_",combo,"_", Samples,".log")
+            )
+          }
+        }
+        message(paste0("[",Sys.time(),"] ","step 1.2 call peaks use : MeRIPtools"))
+        fwrite(dt.parameter.MeRIPtools.parallel, file=paste0(tmp.dir,"/parameter.Method.MeRIPtools.parallel.txt"),sep="\t",row.names = F,col.names=F)
+        parallel.Method.MeRIPtools.cmd <- paste0(bin.dir,"/parallel --workdir ",  out.dir, " -j ", n.cores," --will-cite -a ", paste0(tmp.dir,"/parameter.Method.MeRIPtools.parallel.txt") ," --colsep '\t' '",
+                                                 paste0(bin.dir,"/Rscript "), paste0(script.dir,"/Rscript_"), "{1}.R {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} 1>{14}  2>&1 '")
+        system(command = parallel.Method.MeRIPtools.cmd,wait = T)
+      }
+
+      #1.3 run exomePeak2 method combo
       dt.method.combo.selected.exomepeak2 <- dt.method.combo.selected %>% dplyr::filter(Method == "exomePeak2")
       if(nrow(dt.method.combo.selected.exomepeak2)>0){
         dt.parameter.exomePeak2.parallel <- foreach(M=unique(dt.method.combo.selected.exomepeak2$Method),.combine = 'rbind')%do%{
@@ -441,10 +472,10 @@ runM6APeakS  <- function(
                        nthread=2,#thread for MeRIPtools and exomePeak2 method and ignore for other method
                        Logfile=paste0(log.dir,"/", M, "_",combo,"_", Samples,".log")
             )
-
           }
         }
         fwrite(dt.parameter.exomePeak2.parallel, file=paste0(tmp.dir,"/parameter.Method.exomePeak2.parallel.txt"),sep="\t",row.names = F,col.names=F)
+        message(paste0("[",Sys.time(),"] ","step 1.3 call peaks use : exomePeak2"))
         parallel.Method.exomePeak2.cmd <- paste0(bin.dir,"/parallel --workdir ",  out.dir, " -j ", min(max(floor(n.cores/(quantile(c(dt.stranded.BAM.Depth$Input,dt.stranded.BAM.Depth$RIP),0.75)/30)/8),1),10)," --will-cite -a ", paste0(tmp.dir,"/parameter.Method.exomePeak2.parallel.txt") ," --colsep '\t' '", paste0(bin.dir,"/Rscript "),
                                                  paste0(script.dir,"/Rscript_"), "{1}.R {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} 1>{14}  2>&1 '")
         message(paste0("step 1.1 call peaks use exomePeak2 method"))
