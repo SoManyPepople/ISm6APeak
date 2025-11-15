@@ -427,7 +427,7 @@ runM6APeakS  <- function(
       if(nrow(dt.method.combo.selected.MeRIPtools)>0){
         dt.parameter.MeRIPtools.parallel <- foreach(M=unique(dt.method.combo.selected.MeRIPtools$Method),.combine = 'rbind')%do%{
           foreach(combo = unique(dt.method.combo.selected.MeRIPtools[Method==M,ComboName]), .combine='rbind')%do%{
-            available.threads <- n.cores/length(unique(dt.method.combo.selected.MeRIPtools[Method==M,ComboName]))/(length(Samples)*2*2) %>% floor()
+            available.threads <- n.cores/length(unique(dt.method.combo.selected.MeRIPtools[Method==M,ComboName]))/(length(Samples)) %>% floor()
             data.table(Method=M,
                        bin_path=rep(bin.dir,length(Samples)),
                        InputBAM=InputBAMs,
