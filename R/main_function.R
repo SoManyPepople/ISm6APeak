@@ -394,7 +394,7 @@ runM6APeakS  <- function(
       print(dt.method.combo.selected)
 
       #1.1 run MACS2, TRESS, exomePeak, MeTPeak method combo
-      dt.method.combo.selected.fourmethod <- dt.method.combo.selected %>% dplyr::filter(Method %in% c("exomePeak2","MeRIPtools"))
+      dt.method.combo.selected.fourmethod <- dt.method.combo.selected %>% dplyr::filter(!Method %in% c("exomePeak2","MeRIPtools"))
       if(nrow(dt.method.combo.selected.fourmethod)>0){
         dt.parameter.fourmethod.parallel <- foreach(M=unique(dt.method.combo.selected.fourmethod$Method),.combine = 'rbind')%do%{
           foreach(combo = unique(dt.method.combo.selected.fourmethod[Method==M,ComboName]), .combine='rbind')%do%{
@@ -423,7 +423,7 @@ runM6APeakS  <- function(
       }
 
       #1.2 run MeRIPtools method combo
-      dt.method.combo.selected.MeRIPtools <- dt.method.combo.selected %>% dplyr::filter(Method %in% c("exomePeak2","MeRIPtools"))
+      dt.method.combo.selected.MeRIPtools <- dt.method.combo.selected %>% dplyr::filter(Method %in% c("MeRIPtools"))
       if(nrow(dt.method.combo.selected.MeRIPtools)>0){
         dt.parameter.MeRIPtools.parallel <- foreach(M=unique(dt.method.combo.selected.MeRIPtools$Method),.combine = 'rbind')%do%{
           foreach(combo = unique(dt.method.combo.selected.MeRIPtools[Method==M,ComboName]), .combine='rbind')%do%{
