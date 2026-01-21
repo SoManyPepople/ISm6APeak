@@ -25,11 +25,11 @@ devtools::install_github("SoManyPepople/ISm6APeak")
 ### Collected resource
 
 ISm6APeak require five types of genomic annotation files as input:\
-1.GTF file required by the integrated tools like exomePeak, MeTPeak, and exomePeak2\
-2. knownGene sqlite file required by the integrated tool: TRESS\
-3. genomic chrNameLength file required by the integrated tools and ISm6APeak\
-4. genomic position of all introns(bed file) required by ISm6APeak\
-5. genomic position of all genes (bed file) required by ISm6APeak\
+1.GTF file required by the integrated tools like exomePeak, MeTPeak, and exomePeak2 \
+2. knownGene sqlite file required by the integrated tool: TRESS \
+3. genomic chrNameLength file required by the integrated tools and ISm6APeak \
+4. genomic position of all introns(bed file) required by ISm6APeak \
+5. genomic position of all genes (bed file) required by ISm6APeak \
 
 There were some downloadable annotation files for hg38 and mm39 in [here](https://doi.org/10.6084/m9.figshare.31077001).
 
