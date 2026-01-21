@@ -35,7 +35,8 @@ There were some downloadable annotation files for hg38 and mm39 in [here](https:
 
 ### QC and alignment to prepare BAM files
 
-We recommond STAR for alignment and bamtools to filtered for unique mapped reads as input BAM files for ISm6APeak; To test the installtion of ISm6APeak, demo BAM files could be downloaded from [here](https://doi.org/10.6084/m9.figshare.31077001)
+We recommond STAR for alignment and bamtools to filtered for unique mapped reads as input BAM files for ISm6APeak \
+To test the installtion of ISm6APeak, demo BAM files could be downloaded from [here](https://doi.org/10.6084/m9.figshare.31077001)
 
 ### Perform m6A peak detection
 
