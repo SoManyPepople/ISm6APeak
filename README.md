@@ -31,12 +31,12 @@ ISm6APeak require five types of genomic annotation files as input:\
 4. genomic position of all introns(bed file) required by ISm6APeak \
 5. genomic position of all genes (bed file) required by ISm6APeak
 
-There were some downloadable annotation files for hg38 and mm39 in [here](https://doi.org/10.6084/m9.figshare.31077001).
+There were some downloadable annotation files for [hg38](https://doi.org/10.6084/m9.figshare.31109482) and [mm39](https://doi.org/10.6084/m9.figshare.31109482).
 
 ### QC and alignment to prepare BAM files
 
 We recommond STAR for alignment and samtools to filtered for unique mapped reads as input BAM files for ISm6APeak \
-To test the installtion of ISm6APeak, demo BAM files could be downloaded from [here](https://doi.org/10.6084/m9.figshare.31077001)
+To test the installtion of ISm6APeak, demo BAM files could be downloaded from [here](https://doi.org/10.6084/m9.figshare.31109446)
 
 ### Perform m6A peak detection
 
